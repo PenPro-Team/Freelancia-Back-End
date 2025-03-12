@@ -3,6 +3,12 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
 class User(AbstractUser):
+    class RoleChoices(models.TextChoices):
+        admin = 'admin'
+        client = 'client'
+        freelancer = 'freelancer'
+        # superadmin = 'superadmin'
+
     id = models.AutoField(primary_key=True)
     username =models.CharField(max_length=255, unique=True)
     first_name = models.CharField(max_length=255, unique=False)
@@ -13,8 +19,8 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    Birthdate = models.DateField(null=True, blank=True)
-    Address = models.CharField(max_length=255, null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
@@ -27,16 +33,33 @@ class User(AbstractUser):
     rate = models.DecimalField(max_digits=5, decimal_places=2 , default=0.0)
     total_user_rated = models.IntegerField(default=0)
 
-    role = models.CharField(max_length=10 , choices= [ ['admin' , 'admin'] , ['freelancer' , 'freelancer'] , ['client' , 'client']])
+    role = models.CharField(max_length=10 , choices= RoleChoices.choices)
     
     groups = models.ManyToManyField(Group, related_name='freelancia_user_groups',blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name='freelancia_user_permissions',blank=True)
 
     REQUIRED_FIELDS = ['email' ,'first_name', 'last_name' , 'password']
 
+    # This Propertry Made By A.Abo-ElMagd to use it in serialiers
+    @property
+    def name(self):
+        return f"{self.first_name} {self.last_name}"
+
     def save(self, *args, **kwargs):
-        if self.is_staff or self.is_superuser:
-            self.role = 'admin'
+        if self.role:
+            if self.role == self.RoleChoices.admin:
+                self.is_staff = True
+                self.is_superuser = True
+            # elif self.role == self.RoleChoices.superadmin:
+            #     self.is_staff = True
+            #     self.is_superuser = True
+            elif self.role == self.RoleChoices.client:
+                self.is_staff = False
+                self.is_superuser = False
+            elif self.role == self.RoleChoices.freelancer:
+                self.is_staff = False
+                self.is_superuser = False    
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -52,18 +75,24 @@ class Skill(models.Model):
 
 
 class Project(models.Model):
+    class StatusChoices(models.TextChoices):
+        open = 'open'
+        ongoing = 'ongoing'
+        canceled = 'canceled'
+        contract_canceled_and_reopened = 'contract canceled and reopened'
     id = models.AutoField(primary_key=True)
     owner_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
     project_name = models.CharField(max_length=255)
     project_description = models.TextField()
     # Renamed From job_state By A.Abo-ElMagd
-    project_state = models.CharField(max_length=50 , choices= [ ['open' , 'open'] , ['ongoing' , 'ongoing'] , ['canceled' , 'canceled'] , ['contract canceled and reopened' , 'contract canceled and reopened']])
+    project_state = models.CharField(max_length=50 , choices= StatusChoices.choices , default=StatusChoices.open)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     suggested_budget = models.DecimalField(max_digits=10, decimal_places=2)
     # An Integer Not Date Edited By A.Abo-ElMagd
     expected_deadline = models.IntegerField()
-    required_skills = models.ManyToManyField(Skill)
+    # Renamed From required_skills By A.Abo-ElMagd
+    skills = models.ManyToManyField(Skill)
 
     def __str__(self):
         return self.project_name
@@ -75,11 +104,17 @@ class Proposal(models.Model):
     propose_text = models.TextField()
     # An Integer Not Date Edited By A.Abo-ElMagd
     deadline = models.IntegerField()
-    attachment = models.FileField()
+    attachment = models.FileField(blank=True , null=True)
     # Edited From erd project_id By A.Abo-ElMagd
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='proposals')
     # Edited From erd user_id By Abo-ElMagd
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='proposals')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user' , 'project')
+
+    def __str__(self):
+        return f'{self.user.username} - {self.project.project_name}'
     

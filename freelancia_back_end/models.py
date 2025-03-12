@@ -80,15 +80,17 @@ class Project(models.Model):
         ongoing = 'ongoing'
         canceled = 'canceled'
         contract_canceled_and_reopened = 'contract canceled and reopened'
+        finished = 'finished'
     id = models.AutoField(primary_key=True)
     owner_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name='projects')
     project_name = models.CharField(max_length=255)
     project_description = models.TextField()
-    # Renamed From job_state By A.Abo-ElMagd
-    project_state = models.CharField(max_length=50 , choices= StatusChoices.choices , default=StatusChoices.open)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     suggested_budget = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Renamed From job_state By A.Abo-ElMagd
+    project_state = models.CharField(max_length=50 , choices= StatusChoices.choices , default=StatusChoices.open)
     # An Integer Not Date Edited By A.Abo-ElMagd
     expected_deadline = models.IntegerField()
     # Renamed From required_skills By A.Abo-ElMagd

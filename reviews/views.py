@@ -1,0 +1,83 @@
+from django.shortcuts import render
+from django.http import JsonResponse
+from rest_framework import status
+from .serializers import ReviewSerializer
+from rest_framework.decorators import api_view
+from .models import Review
+from freelancia_back_end.models import User
+# Create your views here.
+
+@api_view(['POST'])
+def create_review(request):
+
+    user=User.objects.get(id=request.data['user_reviewed'])
+    x=user.rate*user.total_user_rated
+    
+
+    serializer = ReviewSerializer(data=request.data)
+    if serializer.is_valid():
+        x+=request.data['rate']
+        user.total_user_rated+=1
+        user.rate=x/user.total_user_rated
+        user.save()
+        serializer.save()
+        return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+    return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# reviews that the user has received elhasanat
+@api_view(['GET'])
+def get_reviews(request, user_id):
+    reviews = Review.objects.filter(user_reviewed=user_id)
+    
+    if not reviews.exists():
+        return JsonResponse(
+            {'message': 'The user does not have any reviews'},
+            status=status.HTTP_404_NOT_FOUND
+        )
+    
+    serializer = ReviewSerializer(reviews, many=True)
+    return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+
+#  reviews that the user has made elsyate
+
+# @api_view(['GET'])
+# def get_reviews(request, user_id):
+#     reviews = Review.objects.filter(user_reviewer=user_id)
+    
+#     if not reviews.exists():
+#         return JsonResponse(
+#             {'message': 'The user does not have any reviews'},
+#             status=status.HTTP_404_NOT_FOUND
+#         )
+    
+#     serializer = ReviewSerializer(reviews, many=True)
+#     return JsonResponse(serializer.data, safe=False, status=status.HTTP_200_OK)
+
+
+@api_view(['PUT','PATCH'])
+def update_review(request,review_id):
+    try:
+        review=Review.objects.get(id=review_id)
+    except Review.DoesNotExist:
+        return JsonResponse({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    
+    
+    # if review.user_reviewr !=request.user:
+    #     print(review.user_reviewr)
+    #     print(request.user)
+    #     return JsonResponse({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
+    
+    serializer = ReviewSerializer(instance=review, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+    return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['DELETE'])
+def delete_review(request,review_id):
+    review=Review.objects.get(id=review_id)
+    # if review.user_reviewr != request.user:
+    #     return JsonResponse({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
+    review.delete()
+    return JsonResponse({'message': 'Review was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
+

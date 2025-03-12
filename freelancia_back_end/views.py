@@ -1,10 +1,12 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .serializers import ProposalSerializer
+from .serializers import ProjectSerializer, ProposalSerializer
 from .models import Proposal , User , Project
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from rest_framework.generics import ListAPIView
+from rest_framework.filters import SearchFilter,OrderingFilter
 
 # Handles Proposals
 @api_view(['GET'])
@@ -37,3 +39,13 @@ def proposal_by_project(request , id):
     proposals = Proposal.objects.filter(project=project)
     serializer = ProposalSerializer(proposals , many=True)
     return Response(serializer.data)
+
+class GetAllProjects(ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class =  ProjectSerializer
+
+class SearchProjects(ListAPIView):
+    queryset = Project.objects.all()
+    serializer_class =  ProjectSerializer
+    filter_backends = (SearchFilter,OrderingFilter)
+    search_fields = ('=project_name','project_description','skills__skill')

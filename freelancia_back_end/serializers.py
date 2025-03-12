@@ -31,8 +31,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 
 class ProposalSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    project = ProjectSerializer(read_only=True)
+    # user = UserSerializer(read_only=True)
+    # project = ProjectSerializer(read_only=True)
 
     class Meta:
         model = Proposal

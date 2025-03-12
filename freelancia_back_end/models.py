@@ -7,6 +7,7 @@ class User(AbstractUser):
         admin = 'admin'
         client = 'client'
         freelancer = 'freelancer'
+        # superadmin = 'superadmin'
 
     id = models.AutoField(primary_key=True)
     username =models.CharField(max_length=255, unique=True)
@@ -18,8 +19,8 @@ class User(AbstractUser):
     updated_at = models.DateTimeField(auto_now=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    Birthdate = models.DateField(null=True, blank=True)
-    Address = models.CharField(max_length=255, null=True, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
 
@@ -39,9 +40,26 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['email' ,'first_name', 'last_name' , 'password']
 
+    # This Propertry Made By A.Abo-ElMagd to use it in serialiers
+    @property
+    def name(self):
+        return f"{self.first_name} {self.last_name}"
+
     def save(self, *args, **kwargs):
-        if self.is_staff or self.is_superuser:
-            self.role = self.RoleChoices.admin.value
+        if self.role:
+            if self.role == self.RoleChoices.admin:
+                self.is_staff = True
+                self.is_superuser = True
+            # elif self.role == self.RoleChoices.superadmin:
+            #     self.is_staff = True
+            #     self.is_superuser = True
+            elif self.role == self.RoleChoices.client:
+                self.is_staff = False
+                self.is_superuser = False
+            elif self.role == self.RoleChoices.freelancer:
+                self.is_staff = False
+                self.is_superuser = False    
+
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -73,7 +91,8 @@ class Project(models.Model):
     suggested_budget = models.DecimalField(max_digits=10, decimal_places=2)
     # An Integer Not Date Edited By A.Abo-ElMagd
     expected_deadline = models.IntegerField()
-    required_skills = models.ManyToManyField(Skill)
+    # Renamed From required_skills By A.Abo-ElMagd
+    skills = models.ManyToManyField(Skill)
 
     def __str__(self):
         return self.project_name
@@ -85,11 +104,17 @@ class Proposal(models.Model):
     propose_text = models.TextField()
     # An Integer Not Date Edited By A.Abo-ElMagd
     deadline = models.IntegerField()
-    attachment = models.FileField()
+    attachment = models.FileField(blank=True , null=True)
     # Edited From erd project_id By A.Abo-ElMagd
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='proposals')
     # Edited From erd user_id By Abo-ElMagd
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='proposals')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user' , 'project')
+
+    def __str__(self):
+        return f'{self.user.username} - {self.project.project_name}'
     

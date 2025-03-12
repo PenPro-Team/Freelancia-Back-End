@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .serializers import ProposalSerializer
+from .serializers import ProjectSerializer, ProposalSerializer
 from .models import Proposal , User , Project
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -92,5 +92,51 @@ class ProposalAPI(APIView):
         proposal.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
+
+# Project Views
+@api_view(['GET'])
+def ProjectView(request):
+    """
+    View to list all projects.
+    """
+    projects = Project.objects.all()
+    serializer = ProjectSerializer(projects, many=True)
+    return Response(serializer.data)
+
+class ProjectAPI(APIView):
+    """
+    API view to handle create, update (PUT/PATCH), and delete operations for Project.
+    """
+    # Create a new project
+    def post(self, request):
+        serializer = ProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Return validation errors if data is not valid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    # Full update of a project (replace the entire instance)
+    def put(self, request, id):
+        project = get_object_or_404(Project, pk=id)
+        serializer = ProjectSerializer(project, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    # Partial update of a project (update only some fields)
+    def patch(self, request, id):
+        project = get_object_or_404(Project, pk=id)
+        serializer = ProjectSerializer(project, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Delete a project
+    def delete(self, request, id):
+        project = get_object_or_404(Project, pk=id)
+        project.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

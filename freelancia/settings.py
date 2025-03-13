@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'freelancia_back_end',
     'reviews',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

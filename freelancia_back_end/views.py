@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import JsonResponse
+import django_filters
 from .serializers import ProjectSerializer, ProposalSerializer, UserSerializer
 from .models import Proposal, User, Project
 from rest_framework.decorators import api_view
@@ -10,6 +11,8 @@ from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.views import APIView
 from rest_framework import status
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Handles Proposals
 
@@ -41,15 +44,35 @@ def proposal_by_project(request , id):
     serializer = ProposalSerializer(proposals , many=True)
     return Response(serializer.data)
 
-class GetAllProjects(ListAPIView):
-    queryset = Project.objects.all()
-    serializer_class =  ProjectSerializer
 
-class SearchProjects(ListAPIView):
+class ProjectSearchFilterView(ListAPIView):
+    serializer_class = ProjectSerializer
     queryset = Project.objects.all()
-    serializer_class =  ProjectSerializer
-    filter_backends = (SearchFilter,OrderingFilter)
-    search_fields = ('=project_name','project_description','skills__skill')
+    
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filterset_fields = ['skills__skill']
+    search_fields = ['project_name', 'project_description']
+
+    def get_queryset(self):
+        queryset = Project.objects.all()
+        search = self.request.GET.get('search', '').strip().lower()
+        skills = self.request.GET.get('skills','').strip().lower()
+
+        if search:
+            queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
+        if skills:
+            skills_query = Q()
+            for skill in skills:
+                skills_query = Q(skills__skill__icontains=skill)
+            queryset = queryset.filter(skills_query).distinct()
+
+
+        return queryset
+
+
+
+
+
 def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
     # proposals = Proposal.objects.filter(user=user)

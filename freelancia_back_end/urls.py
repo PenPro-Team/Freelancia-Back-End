@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-from freelancia_back_end.views import GetAllProjects, ProjectAPI, ProjectView, ProposalAPI, SearchProjects, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, userView
+from freelancia_back_end.views import ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, userView
 
 urlpatterns = [
     path('proposals/', proposal_list, name='proposal_list'),
@@ -17,7 +17,7 @@ urlpatterns = [
     # Project Urls Handling
     # List view for all projects
     path('projects/', ProjectView, name='project_list'),
-    path('projects', SearchProjects.as_view(),name="projects"),
+    path('projects/search/', ProjectSearchFilterView.as_view(), name="projects-search-filter"),
     # API endpoint for create operation
     path('project/', ProjectAPI.as_view(), name='project_api_create'),
     # API endpoint for update (PUT/PATCH) and delete operations on a specific project

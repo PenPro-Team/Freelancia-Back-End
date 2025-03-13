@@ -106,7 +106,7 @@ def delete_review(request,review_id):
     try:
         review=Review.objects.get(id=review_id)
     except Review.DoesNotExist:
-        return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT
+        return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND
 )
     user=User.objects.get(id=review.user_reviewed.id)
     total_stars=user.rate*user.total_user_rated

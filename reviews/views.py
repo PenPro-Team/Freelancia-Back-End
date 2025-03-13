@@ -10,6 +10,14 @@ from rest_framework.response import Response
 @api_view(['POST'])
 def create_review(request):
 
+    user_reviewer_id=request.data.get('user_reviewr')
+    user_reviewed_id=request.data.get('user_reviewed')
+    rate=request.data.get('rate')
+    project_id=request.data.get('project')
+
+    if user_reviewed_id is None or user_reviewer_id is None or rate is None or project_id is None:
+        return Response({'message': 'Please provide all the required fields'}, status=status.HTTP_400_BAD_REQUEST)
+
     if request.data['user_reviewed']==request.data['user_reviewr']:
         return Response({'message': 'You can not review yourself'}, status=status.HTTP_400_BAD_REQUEST)
     

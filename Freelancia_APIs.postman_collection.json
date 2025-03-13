@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "ef780169-80d3-4fd1-a018-300b92397d80",
 		"name": "Freelancia_APIs",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
 		"_exporter_id": "40668884"
 	},
 	"item": [
@@ -14,9 +14,16 @@
 					"request": {
 						"method": "POST",
 						"header": [],
-						"url": {
-							"raw": ""
-						}
+						"body": {
+							"mode": "raw",
+							"raw": "     {\n      \n        \"message\": \"dfas\",\n        \"rate\": 1,\n       \n        \"user_reviewr\": 2,\n        \"user_reviewed\": 1,\n        \"project\": 1\n    }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "{{url}}reviews/create/"
 					},
 					"response": []
 				},
@@ -25,9 +32,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": ""
-						}
+						"url": "{{url}}reviews/received/user/1"
 					},
 					"response": []
 				},
@@ -36,9 +41,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": ""
-						}
+						"url": ""
 					},
 					"response": []
 				},
@@ -47,9 +50,7 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": {
-							"raw": ""
-						}
+						"url": ""
 					},
 					"response": []
 				},
@@ -67,16 +68,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{url}}reviews/update_review/4",
-							"host": [
-								"{{url}}reviews"
-							],
-							"path": [
-								"update_review",
-								"4"
-							]
-						}
+						"url": "{{url}}reviews/update_review/4"
 					},
 					"response": []
 				},
@@ -94,16 +86,7 @@
 								}
 							}
 						},
-						"url": {
-							"raw": "{{url}}reviews/delete_review/4",
-							"host": [
-								"{{url}}reviews"
-							],
-							"path": [
-								"delete_review",
-								"4"
-							]
-						}
+						"url": "{{url}}reviews/delete_review/4"
 					},
 					"response": []
 				}

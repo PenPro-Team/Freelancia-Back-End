@@ -75,8 +75,9 @@ def update_review(request,review_id):
     except Review.DoesNotExist:
         return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
-    user=User.objects.get(id=request.data['user_reviewed'])
+    user=User.objects.get(id=review.user_reviewed.id)
     total_stars=user.rate*user.total_user_rated
+    new_rate=request.data.get('rate')
     
     # if review.user_reviewr !=request.user:
     #     print(review.user_reviewr)
@@ -85,13 +86,17 @@ def update_review(request,review_id):
     
     serializer = ReviewSerializer(instance=review, data=request.data, partial=True)
     if serializer.is_valid():
-        total_stars-=review.rate
-        total_stars+=request.data['rate']
-        if user.total_user_rated==0:
-            user.rate=request.data['rate']
+        if  new_rate==None:
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            user.rate=total_stars/user.total_user_rated
-        user.save()
+            total_stars-=review.rate
+            total_stars+=new_rate
+            if user.total_user_rated==0:
+                user.rate=request.data['rate']
+            else:
+                user.rate=total_stars/user.total_user_rated
+            user.save()
         serializer.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

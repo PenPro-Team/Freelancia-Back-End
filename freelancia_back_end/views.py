@@ -223,6 +223,12 @@ class ProjectAPI(APIView):
     """
     API view to handle create, update (PUT/PATCH), and delete operations for Project.
     """
+    # Get One Project Detail
+    def get(self, request, id):
+        project = get_object_or_404(Project, id=id)
+        serializer = ProjectSerializer(project)
+        return Response(serializer.data)
+
     # Create a new project
 
     def post(self, request):

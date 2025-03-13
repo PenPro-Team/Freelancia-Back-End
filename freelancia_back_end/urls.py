@@ -23,7 +23,7 @@ urlpatterns = [
     # API endpoint for create operation
     path('project/', ProjectAPI.as_view(), name='project_api_create'),
     # API endpoint for update (PUT/PATCH) and delete operations on a specific project
-    path('project/<int:id>/', ProjectAPI.as_view(), name='project_api'),
+    path('project/<int:id>', ProjectAPI.as_view(), name='project_api'),
     # Api Gets All the Skills
     path('skills/', skill_list, name='skill_list'),
     # Api Get Push and Delete the Skill

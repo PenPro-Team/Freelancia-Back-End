@@ -94,7 +94,7 @@ class Project(models.Model):
     # An Integer Not Date Edited By A.Abo-ElMagd
     expected_deadline = models.IntegerField()
     # Renamed From required_skills By A.Abo-ElMagd
-    skills = models.ManyToManyField(Skill)
+    skills = models.ManyToManyField(Skill, related_name="projects")
 
     def __str__(self):
         return self.project_name

@@ -6,8 +6,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.generics import ListAPIView
+from rest_framework.filters import SearchFilter,OrderingFilter
 from rest_framework.views import APIView
 from rest_framework import status
+from django.db.models import Q
+from django_filters.rest_framework import DjangoFilterBackend
 
 # Handles Proposals
 
@@ -33,6 +37,57 @@ def proposal_detail(request, id):
 
 
 @api_view(['GET'])
+def proposal_by_project(request , id):
+    project = get_object_or_404(Project , id=id)
+    proposals = Proposal.objects.filter(project=project)
+    serializer = ProposalSerializer(proposals , many=True)
+    return Response(serializer.data)
+
+
+class ProjectSearchFilterView(ListAPIView):
+    serializer_class = ProjectSerializer
+    queryset = Project.objects.all()
+    
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filterset_fields = ['skills__skill','project_state']
+    search_fields = ['project_name', 'project_description']
+
+    def get_queryset(self):
+        queryset = Project.objects.all()
+        search = self.request.GET.get('search', '').strip()
+        skills = self.request.GET.get('skills','').strip().split(',')
+        states = self.request.GET.get('states','').strip().split(',')
+        # state_query = Q()
+        filter_query = Q()
+        # skills_query = Q()
+        # print(filter_query)
+        if skills and not skills == ['']:
+            print(skills)
+            skills_query= Q()
+            for skill in skills:
+                skills_query |= Q(skills__skill__icontains=skill)
+            filter_query &= skills_query
+            # queryset = queryset.filter(skills_query).distinct()
+        if states and not states == ['']:
+            print(states)
+            states_query = Q()
+            for state in states:
+                states_query |= Q(project_state__iexact=state)
+            filter_query &= states_query
+            # queryset = queryset.filter(state_query).distinct()
+        if search:
+            search_query =Q(project_name__icontains=search) | Q(project_description__icontains=search)
+            filter_query &=search_query
+            # queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
+        print(filter_query)
+        queryset = queryset.filter(filter_query).distinct() if filter_query else queryset
+
+        return queryset
+
+
+
+
+
 def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
     # proposals = Proposal.objects.filter(user=user)

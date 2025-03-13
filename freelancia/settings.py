@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'freelancia_back_end',
+    'reviews',
 ]
 
 MIDDLEWARE = [

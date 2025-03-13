@@ -1,8 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-import django_filters
-from .serializers import ProjectSerializer, ProposalSerializer, UserSerializer
-from .models import Proposal, User, Project
+from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, UserSerializer
+from .models import Proposal, Skill, User, Project
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
@@ -125,7 +124,7 @@ def userView(request):
 
 
 # Get User By Id
-@api_view(['GET', 'PUT', 'DELETE'])
+@api_view(['GET', 'PUT', 'DELETE' , 'PATCH'])
 def userDetailView(request, pk):
     try:
         user = User.objects.get(pk=pk)
@@ -138,6 +137,14 @@ def userDetailView(request, pk):
 
     elif request.method == 'PUT':
         serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    elif request.method == 'PATCH':
+        serializer = UserSerializer(user, data=request.data , partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -250,3 +257,52 @@ class ProjectAPI(APIView):
         project = get_object_or_404(Project, pk=id)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Skill API views
+class SkillAPI(APIView):
+    def get(self, request, id):
+        skill = get_object_or_404(Skill, id=id)
+        serializer = SkillSerializer(skill)
+        return Response(serializer.data)
+
+    def post(self, request):
+        data = request.data
+        print(data)
+        serializer = SkillSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request, id):
+        skill = get_object_or_404(Skill, id=id)
+        serializer = SkillSerializer(data=request.data, instance=skill)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, id):
+        skill = get_object_or_404(Skill, id=id)
+        serializer = SkillSerializer(
+            instance=skill, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, id):
+        skill = get_object_or_404(Skill, id=id)
+        skill.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Get All Skills
+@api_view(['GET'])
+def skill_list(request):
+    """
+    View to list all skills.
+    """
+    skills = Skill.objects.all()
+    serializer = SkillSerializer(skills, many=True)
+    return Response(serializer.data)

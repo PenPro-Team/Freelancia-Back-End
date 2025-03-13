@@ -1,7 +1,16 @@
+# Get Login Tockens
 POST http://localhost:8000/api/token/ HTTP/1.1
 Content-Type: application/json
 
 {
     "username":"admin",
     "password":"admin"
+}
+###
+# Refresh the Login tocken
+POST http://localhost:8000/api/token/refresh/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0MTk3NDE5MCwiaWF0IjoxNzQxODg3NzkwLCJqdGkiOiI3MWE3OWVlOTA5ZmQ0OWUxOWZlYzYwYzU5ZTZlMmViZiIsInVzZXJfaWQiOjF9.TUbwgtRJT_8uehDncHz08NQXw378DpyDbk9j1HOpWQk"
 }

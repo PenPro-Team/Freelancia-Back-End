@@ -62,14 +62,14 @@ class ProjectSearchFilterView(ListAPIView):
         # skills_query = Q()
         # print(filter_query)
         if skills and not skills == ['']:
-            print(skills)
+            # print(skills)
             skills_query= Q()
             for skill in skills:
                 skills_query |= Q(skills__skill__icontains=skill)
             filter_query &= skills_query
             # queryset = queryset.filter(skills_query).distinct()
         if states and not states == ['']:
-            print(states)
+            # print(states)
             states_query = Q()
             for state in states:
                 states_query |= Q(project_state__iexact=state)
@@ -79,7 +79,7 @@ class ProjectSearchFilterView(ListAPIView):
             search_query =Q(project_name__icontains=search) | Q(project_description__icontains=search)
             filter_query &=search_query
             # queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
-        print(filter_query)
+        # print(filter_query)
         queryset = queryset.filter(filter_query).distinct() if filter_query else queryset
 
         return queryset
@@ -101,7 +101,7 @@ def proposal_by_project(request, id):
     project = get_object_or_404(Project, id=id)
     # proposals = Proposal.objects.filter(project=project)
     proposals = project.proposals.all()
-    print(proposals)
+    # print(proposals)
     serializer = ProposalSerializer(proposals, many=True)
     return Response(serializer.data)
 
@@ -178,7 +178,7 @@ class ProposalAPI(APIView):
 
     def post(self, request):
         data = request.data
-        print(data)
+        # print(data)
         serializer = ProposalSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -274,7 +274,7 @@ class SkillAPI(APIView):
 
     def post(self, request):
         data = request.data
-        print(data)
+        # print(data)
         serializer = SkillSerializer(data=data)
         if serializer.is_valid():
             serializer.save()

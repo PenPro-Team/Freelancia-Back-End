@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "ef780169-80d3-4fd1-a018-300b92397d80",
 		"name": "Freelancia_APIs",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "40668884"
 	},
 	"item": [
@@ -23,7 +23,16 @@
 								}
 							}
 						},
-						"url": "{{url}}reviews/create/"
+						"url": {
+							"raw": "{{url}}reviews/create/",
+							"host": [
+								"{{url}}reviews"
+							],
+							"path": [
+								"create",
+								""
+							]
+						}
 					},
 					"response": []
 				},
@@ -32,7 +41,17 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": "{{url}}reviews/received/user/1"
+						"url": {
+							"raw": "{{url}}reviews/received/user/1",
+							"host": [
+								"{{url}}reviews"
+							],
+							"path": [
+								"received",
+								"user",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -41,7 +60,17 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": ""
+						"url": {
+							"raw": "{{url}}reviews/made/user/2",
+							"host": [
+								"{{url}}reviews"
+							],
+							"path": [
+								"made",
+								"user",
+								"2"
+							]
+						}
 					},
 					"response": []
 				},
@@ -50,7 +79,16 @@
 					"request": {
 						"method": "GET",
 						"header": [],
-						"url": ""
+						"url": {
+							"raw": "{{url}}reviews/project/1",
+							"host": [
+								"{{url}}reviews"
+							],
+							"path": [
+								"project",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -68,7 +106,16 @@
 								}
 							}
 						},
-						"url": "{{url}}reviews/update_review/4"
+						"url": {
+							"raw": "{{url}}reviews/update/1",
+							"host": [
+								"{{url}}reviews"
+							],
+							"path": [
+								"update",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
@@ -86,7 +133,16 @@
 								}
 							}
 						},
-						"url": "{{url}}reviews/delete_review/4"
+						"url": {
+							"raw": "{{url}}reviews/delete/1",
+							"host": [
+								"{{url}}reviews"
+							],
+							"path": [
+								"delete",
+								"1"
+							]
+						}
 					},
 					"response": []
 				}
@@ -99,7 +155,17 @@
 					"name": "GET_All_Skills",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}/skills/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"skills",
+								""
+							]
+						}
 					},
 					"response": []
 				},
@@ -107,39 +173,116 @@
 					"name": "Get_One_Skill",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}/skill/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"skill",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Post_Skill",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"skill\": \"Django\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/skill/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"skill",
+								""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Patch_Skill",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"skill\": \"Django Rest Framework\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/skill/6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"skill",
+								"6"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Put_Skill",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 6,\n    \"skill\": \"Django\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/skill/6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"skill",
+								"6"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Delete_Skill",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/skill/6",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"skill",
+								"6"
+							]
+						}
 					},
 					"response": []
 				}
@@ -152,47 +295,144 @@
 					"name": "Get_All_Proposals",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}proposals/",
+							"host": [
+								"{{url}}proposals"
+							],
+							"path": [
+								""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Get_Proposal",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/proposal/2",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"proposal",
+								"2"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Create_Proposal",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\": \"200.00\",\n    \"propose_text\": \"el adfasd fa sda fa\",\n    \"deadline\": 20,\n    \"created_at\": \"2025-03-12T06:26:23.402446Z\",\n    \"project\": 1,\n    \"user\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/proposal/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"proposal",
+								""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Update_Proposal",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 3,\n    \"price\": \"400.00\",\n    \"propose_text\": \"el adfasd fa sda fa\",\n    \"deadline\": 20,\n    \"created_at\": \"2025-03-12T17:18:08.802744Z\",\n    \"project\": 1,\n    \"user\": 4\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}proposal/3",
+							"host": [
+								"{{url}}proposal"
+							],
+							"path": [
+								"3"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Patch_Proposal",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"price\" : \"500.00\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/proposal/3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"proposal",
+								"3"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Delete_Proposal",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/proposal/3",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"proposal",
+								"3"
+							]
+						}
 					},
 					"response": []
 				},
@@ -200,7 +440,17 @@
 					"name": "GET_Proposal_USER",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}proposal/user/3",
+							"host": [
+								"{{url}}proposal"
+							],
+							"path": [
+								"user",
+								"3"
+							]
+						}
 					},
 					"response": []
 				},
@@ -208,7 +458,18 @@
 					"name": "GET_Proposal_Project",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}/proposal/project/1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"proposal",
+								"project",
+								"1"
+							]
+						}
 					},
 					"response": []
 				}
@@ -220,16 +481,61 @@
 				{
 					"name": "login",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\":\"admin\",\n    \"password\":\"admin\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/token/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Refresh login tocken",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0MTk3NDE5MCwiaWF0IjoxNzQxODg3NzkwLCJqdGkiOiI3MWE3OWVlOTA5ZmQ0OWUxOWZlYzYwYzU5ZTZlMmViZiIsInVzZXJfaWQiOjF9.TUbwgtRJT_8uehDncHz08NQXw378DpyDbk9j1HOpWQk\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8000/api/token/refresh/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"api",
+								"token",
+								"refresh",
+								""
+							]
+						}
 					},
 					"response": []
 				}
@@ -242,7 +548,16 @@
 					"name": "List_Projects",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								""
+							]
+						}
 					},
 					"response": []
 				},
@@ -250,39 +565,111 @@
 					"name": "Project_Detal",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}project/1",
+							"host": [
+								"{{url}}project"
+							],
+							"path": [
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Create_New_Project",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n        \"owner_id\" : 1,\n        \"project_name\" : \"Project From API\",\n        \"project_description\": \"This Project From API\",\n        \"suggested_budget\" : 500,\n        \"project_state\":\"open\",\n        \"expected_deadline\": 20,\n        \"skills_ids\" : [ 1 , 2 ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}project/",
+							"host": [
+								"{{url}}project"
+							],
+							"path": [
+								""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Update_Project_PUT",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 2,\n    \"owner_id\": 1,\n    \"project_name\": \"Project From API\",\n    \"project_description\": \"This Project From API\",\n    \"created_at\": \"2025-03-13T19:59:50.214218Z\",\n    \"updated_at\": \"2025-03-13T19:59:50.214357Z\",\n    \"suggested_budget\": \"500.00\",\n    \"project_state\": \"ongoing\",\n    \"expected_deadline\": 20,\n    \"skills_ids\" : [1 , 2]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}project/2",
+							"host": [
+								"{{url}}project"
+							],
+							"path": [
+								"2"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Update_Project_Patch",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"project_state\": \"canceled\"   \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}project/2",
+							"host": [
+								"{{url}}project"
+							],
+							"path": [
+								"2"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "Delete_Project",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}project/2",
+							"host": [
+								"{{url}}project"
+							],
+							"path": [
+								"2"
+							]
+						}
 					},
 					"response": []
 				}
@@ -295,7 +682,23 @@
 					"name": "Search",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/search/?search=el",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"search",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "el"
+								}
+							]
+						}
 					},
 					"response": []
 				},
@@ -303,7 +706,23 @@
 					"name": "Skill-Filtration",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/search/?skills=python",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"search",
+								""
+							],
+							"query": [
+								{
+									"key": "skills",
+									"value": "python"
+								}
+							]
+						}
 					},
 					"response": []
 				},
@@ -311,15 +730,55 @@
 					"name": "State-Filtration",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/search/?states=open",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"search",
+								""
+							],
+							"query": [
+								{
+									"key": "states",
+									"value": "open"
+								}
+							]
+						}
 					},
 					"response": []
 				},
 				{
-					"name": "State-Filtration Copy",
+					"name": "Search-Filration",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/search/?search=el&states=open,canceled&skills=python,js",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"search",
+								""
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "el"
+								},
+								{
+									"key": "states",
+									"value": "open,canceled"
+								},
+								{
+									"key": "skills",
+									"value": "python,js"
+								}
+							]
+						}
 					},
 					"response": []
 				}
@@ -332,15 +791,46 @@
 					"name": "Users_List",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}api/v1/user/",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"v1",
+								"user",
+								""
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "User_Create",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"first_name\": \"admin\",\n    \"last_name\": \"admin\",\n    \"email\": \"admin@admin.com\",\n    \"password\": \"1234\"\n    \n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/v1/user/",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"v1",
+								"user",
+								""
+							]
+						}
 					},
 					"response": []
 				},
@@ -348,23 +838,74 @@
 					"name": "User_Details",
 					"request": {
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{url}}api/v1/user/1",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"v1",
+								"user",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "User_Update_PUT",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"last_login\": \"2025-03-12T06:15:37.144638Z\",\n    \"is_active\": true,\n    \"date_joined\": \"2025-03-12T04:56:22.173194Z\",\n    \"username\": \"admin\",\n    \"first_name\": \"admin\",\n    \"last_name\": \"admin\",\n    \"email\": \"admin@admin.com\",\n    \"password\": \"pbkdf2_sha256$870000$RPSQ5i4705HHVQTaL9ZEol$Njc3NIId0xPbSmMlw3O/dlsBk6yb1gNNDpzYD8VQhu4=\",\n    \"created_at\": \"2025-03-12T04:56:22.739313Z\",\n    \"updated_at\": \"2025-03-13T19:18:13.190367Z\",\n    \"is_staff\": true,\n    \"is_superuser\": true,\n    \"birth_date\": null,\n    \"address\": null,\n    \"postal_code\": null,\n    \"description\": null,\n    \"image\": null,\n    \"phone\": null,\n    \"rate\": \"0.00\",\n    \"total_user_rated\": 0,\n    \"role\": \"admin\",\n    \"groups\": [\n        1\n    ],\n    \"user_permissions\": []\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/v1/user/1",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"v1",
+								"user",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},
 				{
 					"name": "User_Update_PATCH",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"address\": \"ALEX\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/v1/user/1",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"v1",
+								"user",
+								"1"
+							]
+						}
 					},
 					"response": []
 				},

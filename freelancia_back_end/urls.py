@@ -15,7 +15,7 @@ urlpatterns = [
     path('proposal/<int:id>', ProposalAPI.as_view(), name='proposal_api'),
     # view For User Oprations
     path('api/v1/user/', userView, name='userView'),
-    path('api/v1/user/<int:pk>/', views.userDetailView),
+    path('api/v1/user/<int:pk>', views.userDetailView),
     # Project Urls Handling
     # List view for all projects
     path('projects/', ProjectView, name='project_list'),

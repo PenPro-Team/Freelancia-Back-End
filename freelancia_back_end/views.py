@@ -50,22 +50,38 @@ class ProjectSearchFilterView(ListAPIView):
     queryset = Project.objects.all()
     
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['skills__skill']
+    filterset_fields = ['skills__skill','project_state']
     search_fields = ['project_name', 'project_description']
 
     def get_queryset(self):
         queryset = Project.objects.all()
-        search = self.request.GET.get('search', '').strip().lower()
-        skills = self.request.GET.get('skills','').strip().lower()
-
-        if search:
-            queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
-        if skills:
-            skills_query = Q()
+        search = self.request.GET.get('search', '').strip()
+        skills = self.request.GET.get('skills','').strip().split(',')
+        states = self.request.GET.get('states','').strip().split(',')
+        # state_query = Q()
+        filter_query = Q()
+        # skills_query = Q()
+        # print(filter_query)
+        if skills and not skills == ['']:
+            print(skills)
+            skills_query= Q()
             for skill in skills:
-                skills_query = Q(skills__skill__icontains=skill)
-            queryset = queryset.filter(skills_query).distinct()
-
+                skills_query |= Q(skills__skill__icontains=skill)
+            filter_query &= skills_query
+            # queryset = queryset.filter(skills_query).distinct()
+        if states and not states == ['']:
+            print(states)
+            states_query = Q()
+            for state in states:
+                states_query |= Q(project_state__iexact=state)
+            filter_query &= states_query
+            # queryset = queryset.filter(state_query).distinct()
+        if search:
+            search_query =Q(project_name__icontains=search) | Q(project_description__icontains=search)
+            filter_query &=search_query
+            # queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
+        print(filter_query)
+        queryset = queryset.filter(filter_query).distinct() if filter_query else queryset
 
         return queryset
 

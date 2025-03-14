@@ -226,7 +226,7 @@ class ProjectAPI(APIView):
     # Get One Project Detail
     def get(self, request, id):
         project = get_object_or_404(Project, id=id)
-        serializer = ProjectSerializer(project)
+        serializer = ProjectSerializer(project , context={'request': request})
         return Response(serializer.data)
 
     # Create a new project

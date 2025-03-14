@@ -21,7 +21,7 @@ from rest_framework.permissions import IsAuthenticated
 @api_view(['GET'])
 def proposal_list(request):
     proposals = Proposal.objects.all()
-    serializer = ProposalSerializer(proposals, many=True)
+    serializer = ProposalSerializer(proposals, many=True , context={'request': request})
     # return JsonResponse({
     #     'data' : serializer.data
     # })
@@ -34,7 +34,7 @@ def proposal_list(request):
 def proposal_detail(request, id):
     # proposal = Proposal.objects.get(id = 'id')
     proposal = get_object_or_404(Proposal, id=id)
-    serializer = ProposalSerializer(proposal)
+    serializer = ProposalSerializer(proposal , context={'request': request})
     return Response(serializer.data)
 
 
@@ -42,7 +42,7 @@ def proposal_detail(request, id):
 def proposal_by_project(request, id):
     project = get_object_or_404(Project, id=id)
     proposals = Proposal.objects.filter(project=project)
-    serializer = ProposalSerializer(proposals, many=True)
+    serializer = ProposalSerializer(proposals, many=True , context={'request': request})
     return Response(serializer.data)
 
 
@@ -93,7 +93,7 @@ def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
     # proposals = Proposal.objects.filter(user=user)
     proposals = user.proposals.all()
-    serializer = ProposalSerializer(proposals, many=True)
+    serializer = ProposalSerializer(proposals, many=True, context={'request': request})
     return Response(serializer.data)
 
 
@@ -103,7 +103,7 @@ def proposal_by_project(request, id):
     # proposals = Proposal.objects.filter(project=project)
     proposals = project.proposals.all()
     # print(proposals)
-    serializer = ProposalSerializer(proposals, many=True)
+    serializer = ProposalSerializer(proposals, many=True, context={'request': request})
     return Response(serializer.data)
 
 
@@ -113,7 +113,7 @@ def userView(request):
     if request.method == 'GET':
         # Get All Data From User Table
         user = User.objects.all()
-        serializer = UserSerializer(user, many=True)
+        serializer = UserSerializer(user, many=True , context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
     # POST
     elif request.method == 'POST':
@@ -133,7 +133,7 @@ def userDetailView(request, pk):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == 'GET':
-        serializer = UserSerializer(user)
+        serializer = UserSerializer(user , context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
@@ -157,47 +157,6 @@ def userDetailView(request, pk):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# class IsTokenValid(BasePermission):
-#     def has_permission(self, request, view):
-#         user_id = request.user.id
-#         is_allowed_user = True
-#         token = request.auth.decode("utf-8")
-#         try:
-#             is_blackListed = BlackListedToken.objects.get(
-#                 user=user_id, token=token)
-#             if is_blackListed:
-#                 is_allowed_user = False
-#         except BlackListedToken.DoesNotExist:
-#             is_allowed_user = True
-#         return is_allowed_user
-
-# # LogOut
-
-
-# class LogoutView(APIView):
-#     permission_classes = (IsAuthenticated,)
-
-#     def post(self, request):
-#         try:
-#             refresh_token = request.data["refresh_token"]
-#             token = RefreshToken(refresh_token)
-#             token.blacklist()
-
-#             return Response(status=status.HTTP_205_RESET_CONTENT)
-#         except Exception as e:
-#             return Response(status=status.HTTP_400_BAD_REQUEST)
-
-
-# class LogoutAllView(APIView):
-#     permission_classes = (IsAuthenticated,)
-
-#     def post(self, request):
-#         tokens = OutstandingToken.objects.filter(user_id=request.user.id)
-#         for token in tokens:
-#             t, _ = BlacklistedToken.objects.get_or_create(token=token)
-
-#         return Response(status=status.HTTP_205_RESET_CONTENT)
-
 class LogoutView(APIView):
     permission_classes = (IsAuthenticated,)
 
@@ -215,7 +174,7 @@ class LogoutView(APIView):
 class ProposalView(APIView):
     def get(self, request):
         proposals = Proposal.objects.all()
-        serializer = ProposalSerializer(proposals, many=True)
+        serializer = ProposalSerializer(proposals, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
@@ -229,7 +188,7 @@ class ProposalView(APIView):
 class ProposalAPI(APIView):
     def get(self, request, id):
         proposal = get_object_or_404(Proposal, id=id)
-        serializer = ProposalSerializer(proposal)
+        serializer = ProposalSerializer(proposal , context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
@@ -271,7 +230,7 @@ def ProjectView(request):
     View to list all projects.
     """
     projects = Project.objects.all()
-    serializer = ProjectSerializer(projects, many=True)
+    serializer = ProjectSerializer(projects, many=True, context={'request': request})
     return Response(serializer.data)
 
 

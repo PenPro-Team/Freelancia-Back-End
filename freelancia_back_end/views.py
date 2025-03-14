@@ -86,8 +86,6 @@ class ProjectSearchFilterView(ListAPIView):
 
 
 
-
-
 def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
     # proposals = Proposal.objects.filter(user=user)

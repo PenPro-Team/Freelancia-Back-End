@@ -1,17 +1,19 @@
 from django.shortcuts import render
 from django.http import JsonResponse
 from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, UserSerializer
-from .models import Proposal, Skill, User, Project
+from .models import BlackListedToken, Proposal, Skill, User, Project
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView
-from rest_framework.filters import SearchFilter,OrderingFilter
+from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.permissions import IsAuthenticated
 
 # Handles Proposals
 
@@ -37,33 +39,33 @@ def proposal_detail(request, id):
 
 
 @api_view(['GET'])
-def proposal_by_project(request , id):
-    project = get_object_or_404(Project , id=id)
+def proposal_by_project(request, id):
+    project = get_object_or_404(Project, id=id)
     proposals = Proposal.objects.filter(project=project)
-    serializer = ProposalSerializer(proposals , many=True)
+    serializer = ProposalSerializer(proposals, many=True)
     return Response(serializer.data)
 
 
 class ProjectSearchFilterView(ListAPIView):
     serializer_class = ProjectSerializer
     queryset = Project.objects.all()
-    
+
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    filterset_fields = ['skills__skill','project_state']
+    filterset_fields = ['skills__skill', 'project_state']
     search_fields = ['project_name', 'project_description']
 
     def get_queryset(self):
         queryset = Project.objects.all()
         search = self.request.GET.get('search', '').strip()
-        skills = self.request.GET.get('skills','').strip().split(',')
-        states = self.request.GET.get('states','').strip().split(',')
+        skills = self.request.GET.get('skills', '').strip().split(',')
+        states = self.request.GET.get('states', '').strip().split(',')
         # state_query = Q()
         filter_query = Q()
         # skills_query = Q()
         # print(filter_query)
         if skills and not skills == ['']:
             # print(skills)
-            skills_query= Q()
+            skills_query = Q()
             for skill in skills:
                 skills_query |= Q(skills__skill__icontains=skill)
             filter_query &= skills_query
@@ -76,16 +78,15 @@ class ProjectSearchFilterView(ListAPIView):
             filter_query &= states_query
             # queryset = queryset.filter(state_query).distinct()
         if search:
-            search_query =Q(project_name__icontains=search) | Q(project_description__icontains=search)
-            filter_query &=search_query
+            search_query = Q(project_name__icontains=search) | Q(
+                project_description__icontains=search)
+            filter_query &= search_query
             # queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
         # print(filter_query)
-        queryset = queryset.filter(filter_query).distinct() if filter_query else queryset
+        queryset = queryset.filter(
+            filter_query).distinct() if filter_query else queryset
 
         return queryset
-
-
-
 
 
 def proposal_by_user(request, id):
@@ -124,7 +125,7 @@ def userView(request):
 
 
 # Get User By Id
-@api_view(['GET', 'PUT', 'DELETE' , 'PATCH'])
+@api_view(['GET', 'PUT', 'DELETE', 'PATCH'])
 def userDetailView(request, pk):
     try:
         user = User.objects.get(pk=pk)
@@ -142,9 +143,9 @@ def userDetailView(request, pk):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
     elif request.method == 'PATCH':
-        serializer = UserSerializer(user, data=request.data , partial=True)
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -154,6 +155,61 @@ def userDetailView(request, pk):
     elif request.method == 'DELETE':
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# class IsTokenValid(BasePermission):
+#     def has_permission(self, request, view):
+#         user_id = request.user.id
+#         is_allowed_user = True
+#         token = request.auth.decode("utf-8")
+#         try:
+#             is_blackListed = BlackListedToken.objects.get(
+#                 user=user_id, token=token)
+#             if is_blackListed:
+#                 is_allowed_user = False
+#         except BlackListedToken.DoesNotExist:
+#             is_allowed_user = True
+#         return is_allowed_user
+
+# # LogOut
+
+
+# class LogoutView(APIView):
+#     permission_classes = (IsAuthenticated,)
+
+#     def post(self, request):
+#         try:
+#             refresh_token = request.data["refresh_token"]
+#             token = RefreshToken(refresh_token)
+#             token.blacklist()
+
+#             return Response(status=status.HTTP_205_RESET_CONTENT)
+#         except Exception as e:
+#             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+# class LogoutAllView(APIView):
+#     permission_classes = (IsAuthenticated,)
+
+#     def post(self, request):
+#         tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+#         for token in tokens:
+#             t, _ = BlacklistedToken.objects.get_or_create(token=token)
+
+#         return Response(status=status.HTTP_205_RESET_CONTENT)
+
+class LogoutView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProposalView(APIView):
@@ -224,6 +280,7 @@ class ProjectAPI(APIView):
     API view to handle create, update (PUT/PATCH), and delete operations for Project.
     """
     # Get One Project Detail
+
     def get(self, request, id):
         project = get_object_or_404(Project, id=id)
         serializer = ProjectSerializer(project , context={'request': request})
@@ -304,6 +361,8 @@ class SkillAPI(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Get All Skills
+
+
 @api_view(['GET'])
 def skill_list(request):
     """

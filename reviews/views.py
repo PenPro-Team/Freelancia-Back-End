@@ -78,6 +78,8 @@ def get_project_reviews(request,project_id):
 
 @api_view(['PUT','PATCH'])
 def update_review(request,review_id):
+    if review.user_reviewr !=request.user:
+        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     try:
         review=Review.objects.get(id=review_id)
     except Review.DoesNotExist:
@@ -87,12 +89,13 @@ def update_review(request,review_id):
     total_stars=user.rate*user.total_user_rated
     new_rate=request.data.get('rate')
     
-    # if review.user_reviewr !=request.user:
-    #     print(review.user_reviewr)
-    #     print(request.user)
-    #     return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
+    print(f'curent user {review.user_reviewr}' )
+    print(f'this is the coming user {request.user}')
+    if request.method == 'PATCH':
+        serializer = ReviewSerializer(instance=review, data=request.data, partial=True)
+    else:
+        serializer = ReviewSerializer(instance=review, data=request.data)
     
-    serializer = ReviewSerializer(instance=review, data=request.data, partial=True)
     if serializer.is_valid():
         if  new_rate==None:
             serializer.save()
@@ -111,6 +114,8 @@ def update_review(request,review_id):
 
 @api_view(['DELETE'])
 def delete_review(request,review_id):
+    if review.user_reviewr != request.user and request.user.role != 'admin':
+        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     try:
         review=Review.objects.get(id=review_id)
     except Review.DoesNotExist:
@@ -125,8 +130,6 @@ def delete_review(request,review_id):
     else:
         user.rate=total_stars/user.total_user_rated
     user.save()
-    # if review.user_reviewr != request.user:
-    #     return JsonResponse({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     review.delete()
     return Response({'message': 'Review was deleted successfully!'}, status=status.HTTP_204_NO_CONTENT)
 

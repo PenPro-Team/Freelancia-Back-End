@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'freelancia_back_end',
     'reviews',
     'django_filters',
+    'contract',
     'corsheaders',
 ]
 

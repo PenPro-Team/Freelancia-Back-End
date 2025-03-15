@@ -2,9 +2,25 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+from freelancia import settings
+
 from .models import User , Project , Skill , Proposal
 
+from django.conf import settings
+from urllib.parse import urljoin
+
 class UserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            else:
+                return urljoin(settings.MEDIA_URL, str(obj.image))
+        return None
+
     class Meta:
         model = User
         fields = '__all__'
@@ -27,7 +43,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         for skill in obj.skills.all():
             required_skills.append(skill.skill)
         return required_skills
-
+    owner_id = UserSerializer(read_only=True)
     class Meta:
         model = Project
         fields = [

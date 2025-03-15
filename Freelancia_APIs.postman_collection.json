@@ -793,13 +793,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}api/v1/user/",
+							"raw": "{{url}}users/",
 							"host": [
-								"{{url}}api"
+								"{{url}}users"
 							],
 							"path": [
-								"v1",
-								"user",
 								""
 							]
 						}
@@ -813,7 +811,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin\",\n    \"first_name\": \"admin\",\n    \"last_name\": \"admin\",\n    \"email\": \"admin@admin.com\",\n    \"password\": \"1234\"\n    \n}",
+							"raw": "{\n    \"username\": \"test\",\n    \"first_name\": \"test\",\n    \"last_name\": \"test\",\n    \"email\": \"test@test.com\",\n    \"password\": \"1234\",\n    \"role\": \"client\"\n    \n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -821,13 +819,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}api/v1/user/",
+							"raw": "{{url}}users/",
 							"host": [
-								"{{url}}api"
+								"{{url}}users"
 							],
 							"path": [
-								"v1",
-								"user",
 								""
 							]
 						}
@@ -840,13 +836,11 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}api/v1/user/1",
+							"raw": "{{url}}users/1",
 							"host": [
-								"{{url}}api"
+								"{{url}}users"
 							],
 							"path": [
-								"v1",
-								"user",
 								"1"
 							]
 						}
@@ -868,13 +862,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}api/v1/user/1",
+							"raw": "{{url}}users/1",
 							"host": [
-								"{{url}}api"
+								"{{url}}users"
 							],
 							"path": [
-								"v1",
-								"user",
 								"1"
 							]
 						}
@@ -896,13 +888,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}api/v1/user/1",
+							"raw": "{{url}}users/1",
 							"host": [
-								"{{url}}api"
+								"{{url}}users"
 							],
 							"path": [
-								"v1",
-								"user",
 								"1"
 							]
 						}
@@ -912,8 +902,17 @@
 				{
 					"name": "User_Delete",
 					"request": {
-						"method": "GET",
-						"header": []
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}users/7",
+							"host": [
+								"{{url}}users"
+							],
+							"path": [
+								"7"
+							]
+						}
 					},
 					"response": []
 				}

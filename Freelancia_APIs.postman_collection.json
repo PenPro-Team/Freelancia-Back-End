@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "ef780169-80d3-4fd1-a018-300b92397d80",
+		"_postman_id": "a0df2541-784f-49f0-8288-cf34d9b2e968",
 		"name": "Freelancia_APIs",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "40668884"
+		"_exporter_id": "43093767",
+		"_collection_link": "https://penpro-7660.postman.co/workspace/PenPro~a5c2064c-ac35-4303-8a46-bdf5d7166638/collection/43093661-a0df2541-784f-49f0-8288-cf34d9b2e968?action=share&source=collection_link&creator=43093767"
 	},
 	"item": [
 		{
@@ -911,6 +912,83 @@
 							],
 							"path": [
 								"7"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "contract",
+			"item": [
+				{
+					"name": "create contract",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contract_terms\": \"jkfhiasuo\",\n    \"dedline\": 14,\n    \"budget\": 1200,\n    \"freelancer\":4,\n    \"client\":3,\n    \"project\":2\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}contract/create",
+							"host": [
+								"{{url}}contract"
+							],
+							"path": [
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get user contracts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}contract/user/contracts/3",
+							"host": [
+								"{{url}}contract"
+							],
+							"path": [
+								"user",
+								"contracts",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update contract",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"contract_terms\": \"jkfhiasuo\",\n    \"dedline\": 14,\n    \"budget\": 1200,\n    \"freelancer\":4,\n    \"client\":3,\n    \"project\":1,\n    \"contract_state\": \"canceled\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}contract/update/6",
+							"host": [
+								"{{url}}contract"
+							],
+							"path": [
+								"update",
+								"6"
 							]
 						}
 					},

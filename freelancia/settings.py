@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'contract',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
+    'portfolio',
 ]
 
 MIDDLEWARE = [

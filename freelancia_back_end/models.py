@@ -61,6 +61,9 @@ class User(AbstractUser):
             elif self.role == self.RoleChoices.freelancer:
                 self.is_staff = False
                 self.is_superuser = False
+                
+        if self.is_staff and self.is_superuser:
+            self.role = self.RoleChoices.admin
 
         super().save(*args, **kwargs)
 

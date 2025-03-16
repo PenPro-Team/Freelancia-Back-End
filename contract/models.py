@@ -16,7 +16,7 @@ class Contract(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     freelancer= models.ForeignKey(User, on_delete=models.CASCADE, related_name='freelancer')
     client= models.ForeignKey(User, on_delete=models.CASCADE, related_name='client')
-    project = models.OneToOneField(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project')
     contract_state = models.CharField(max_length=20,choices= StatusChoices.choices ,default='pending')
 
 

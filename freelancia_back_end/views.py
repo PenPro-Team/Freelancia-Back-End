@@ -13,7 +13,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated , AllowAny , IsAdminUser
+
+from .permissions import IsOwnerOrAdminOrReadOnly
+from django.db import IntegrityError
 
 # Handles Proposals
 
@@ -89,10 +92,11 @@ class ProjectSearchFilterView(ListAPIView):
         return queryset
 
 
+@api_view(['GET'])
 def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
-    # proposals = Proposal.objects.filter(user=user)
-    proposals = user.proposals.all()
+    proposals = Proposal.objects.filter(user=user)
+    # proposals = user.proposals.all()
     serializer = ProposalSerializer(proposals, many=True, context={'request': request})
     return Response(serializer.data)
 
@@ -100,8 +104,8 @@ def proposal_by_user(request, id):
 @api_view(['GET'])
 def proposal_by_project(request, id):
     project = get_object_or_404(Project, id=id)
-    # proposals = Proposal.objects.filter(project=project)
-    proposals = project.proposals.all()
+    proposals = Proposal.objects.filter(project=project)
+    # proposals = project.proposals.all()
     # print(proposals)
     serializer = ProposalSerializer(proposals, many=True, context={'request': request})
     return Response(serializer.data)
@@ -171,54 +175,85 @@ class LogoutView(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProposalView(APIView):
+class ProposalViewAndCreate(APIView):
+    # permission_classes = [AllowAny]
+    
+    # def get_permissions(self):
+    #     self.permission_classes = [AllowAny]
+    #     if self.request.method == 'POST':
+    #         self.permission_classes = [IsAuthenticated , IsAdminUser]
+    #     return super().get_permissions()
+
+    def get_permissions(self):
+        return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
+
     def get(self, request):
         proposals = Proposal.objects.all()
+
+        user_id = request.query_params.get('user' , None)
+        project_id = request.query_params.get('project' , None)
+
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+            proposals = proposals.filter(user=user)
+        if project_id:
+            project = get_object_or_404(Project, id=project_id)
+            proposals = proposals.filter(project=project)
         serializer = ProposalSerializer(proposals, many=True, context={'request': request})
         return Response(serializer.data)
 
     def post(self, request):
+        self.permission_classes = [IsAuthenticated , IsAdminUser]
         serializer = ProposalSerializer(data=request.data)
+        if request.data['project']:
+            project = get_object_or_404(Project, id=request.data['project'])
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+            try:
+                # Save the proposal with the logged-in user and project
+                serializer.save(user=request.user, project=project)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                # Handle the case where a proposal already exists for this user and project
+                return Response(
+                    {"error": "You have already submitted a proposal for this project."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ProposalAPI(APIView):
-    def get(self, request, id):
+    def get_permissions(self):
+        print("Applying permissions for method:", self.request.method)
+        return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
+
+    def get_object(self, id):
         proposal = get_object_or_404(Proposal, id=id)
-        serializer = ProposalSerializer(proposal , context={'request': request})
+        self.check_object_permissions(self.request, proposal)
+        return proposal
+
+    def get(self, request, id):
+        proposal = self.get_object(id)
+        serializer = ProposalSerializer(proposal, context={'request': request})
         return Response(serializer.data)
 
-    def post(self, request):
-        data = request.data
-        # print(data)
-        serializer = ProposalSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def put(self, request, id):
-        proposal = get_object_or_404(Proposal, id=id)
+        proposal = self.get_object(id)
         serializer = ProposalSerializer(data=request.data, instance=proposal)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=proposal.user, project=proposal.project)
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, id):
-        proposal = get_object_or_404(Proposal, id=id)
-        serializer = ProposalSerializer(
-            instance=proposal, data=request.data, partial=True)
+        proposal = self.get_object(id)
+        serializer = ProposalSerializer(instance=proposal, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, id):
-        proposal = get_object_or_404(Proposal, id=id)
+        proposal = self.get_object(id)
         proposal.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -283,6 +318,8 @@ class ProjectAPI(APIView):
 
 # Skill API views
 class SkillAPI(APIView):
+    permission_classes = [IsAuthenticated , IsAdminUser]
+
     def get(self, request, id):
         skill = get_object_or_404(Skill, id=id)
         serializer = SkillSerializer(skill)

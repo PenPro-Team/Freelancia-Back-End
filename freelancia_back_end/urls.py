@@ -1,17 +1,18 @@
 from django.urls import path
 from . import views
 
-from freelancia_back_end.views import LogoutView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, SkillAPI, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
+from freelancia_back_end.views import LogoutView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, ProposalViewAndCreate, SkillAPI, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
 
 urlpatterns = [
     # Proposal Read (get) API
-    path('proposals/', proposal_list, name='proposal_list'),
-    path('proposals/<int:id>', proposal_detail, name='proposal_detail'),
+#     path('proposals/', proposal_list, name='proposal_list'),
+#     path('proposals/<int:id>', proposal_detail, name='proposal_detail'),
+    path('proposals/', ProposalViewAndCreate.as_view(), name='proposal_list'),
     path('proposals/user/<int:id>', proposal_by_user, name='user_proposals'),
     path('proposals/project/<int:id>',
          proposal_by_project, name='project_proposals'),
     # Proposal Post API
-    path('proposals/create', ProposalAPI.as_view(), name='proposal_api_create'),
+#     path('proposals/create', ProposalAPI.as_view(), name='proposal_api_create'),
     # Prpoposal READ Write GET
     path('proposals/<int:id>', ProposalAPI.as_view(), name='proposal_api'),
     # view For User Oprations

@@ -17,7 +17,7 @@ class CustomUserAdmin(UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ( 'username' , 'email', 'first_name' , 'last_name' , 'password1', 'password2', 'birth_date' , 'postal_code' , 'address' , 'role'),
+            'fields': ( 'username' , 'email', 'first_name' , 'last_name' , 'password1', 'password2', 'birth_date' , 'image' , 'postal_code' , 'address' , 'role'),
         }),
     )
 

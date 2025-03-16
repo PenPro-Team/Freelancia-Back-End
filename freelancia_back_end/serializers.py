@@ -11,6 +11,7 @@ from urllib.parse import urljoin
 
 class UserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
 
     def get_image(self, obj):
         if obj.image:
@@ -21,9 +22,30 @@ class UserSerializer(serializers.ModelSerializer):
                 return urljoin(settings.MEDIA_URL, str(obj.image))
         return None
 
+    def get_name(self,obj):
+        if obj.name:
+            return obj.name
+        else:
+            return ""
+
+
     class Meta:
         model = User
         fields = '__all__'
+        read_only_fields = (
+            'id',
+            'role',
+            'is_staff',
+            'is_superuser',
+            'is_active',
+            'created_at',
+            'updated_at',
+            'rate',
+            'total_user_rated',
+            'groups',
+            'user_permissions',
+            'name',
+        )
 
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
@@ -99,7 +121,13 @@ class ProposalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proposal
-        fields = ( 'id', 'price' , 'propose_text' , 'deadline' , 'created_at' , 'project', 'user')
+        fields = '__all__'
+        read_only_fields = (
+            'id',
+            'created_at',
+            'updated_at',
+            'user',
+        )
 
     def validate_price(self, value):
         if value <= 0:

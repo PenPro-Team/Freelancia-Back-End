@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "a0df2541-784f-49f0-8288-cf34d9b2e968",
+		"_postman_id": "f6b3ccf9-a53b-4cf5-b0ac-19dee6fa45f2",
 		"name": "Freelancia_APIs",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "43093767",
-		"_collection_link": "https://penpro-7660.postman.co/workspace/PenPro~a5c2064c-ac35-4303-8a46-bdf5d7166638/collection/43093661-a0df2541-784f-49f0-8288-cf34d9b2e968?action=share&source=collection_link&creator=43093767"
+		"_exporter_id": "40668884"
 	},
 	"item": [
 		{
@@ -17,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "     {\n      \n        \"message\": \"dfas\",\n        \"rate\": 1,\n       \n        \"user_reviewr\": 2,\n        \"user_reviewed\": 1,\n        \"project\": 1\n    }",
+							"raw": "     {\n      \n        \"message\": \"dfas\",\n        \"rate\": 4,\n       \n        \"user_reviewr\": 1,\n        \"user_reviewed\": 2,\n        \"project\": 1\n    }",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -327,12 +326,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/proposal/2",
+							"raw": "{{url}}/proposals/2",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"proposal",
+								"proposals",
 								"2"
 							]
 						}
@@ -342,11 +341,21 @@
 				{
 					"name": "Create_Proposal",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMTQ1NTY2LCJpYXQiOjE3NDIxNDUyNjYsImp0aSI6IjJkNmVmMDk1ZTRkNDQzZjliYThmNTUwMGFmMzdhMTNmIiwidXNlcl9pZCI6M30.4Pd8FRlUhzmL8ltZcIe19zNX5NnRrHtP7GZX0xSAac4",
+									"type": "string"
+								}
+							]
+						},
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"price\": \"200.00\",\n    \"propose_text\": \"el adfasd fa sda fa\",\n    \"deadline\": 20,\n    \"created_at\": \"2025-03-12T06:26:23.402446Z\",\n    \"project\": 1,\n    \"user\": 4\n}",
+							"raw": "{\n    \"price\": \"500.00\",\n    \"propose_text\": \"I read your requirements and ready Iam sure i can do it\",\n    \"deadline\": 15,\n    \"project\": 1\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -354,12 +363,11 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/proposal/",
+							"raw": "{{url}}proposals/",
 							"host": [
-								"{{url}}"
+								"{{url}}proposals"
 							],
 							"path": [
-								"proposal",
 								""
 							]
 						}
@@ -369,11 +377,21 @@
 				{
 					"name": "Update_Proposal",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMTQ0OTE3LCJpYXQiOjE3NDIxNDQ2MTcsImp0aSI6ImEzNTgwOTZiZjc2ODRkMWJhMzNkMDEzZGY5NTllYzZlIiwidXNlcl9pZCI6MX0.UqPIViCfXU-2gkiz_lgY07mSV3sjGeFuHojZw5vwkGA",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"id\": 3,\n    \"price\": \"400.00\",\n    \"propose_text\": \"el adfasd fa sda fa\",\n    \"deadline\": 20,\n    \"created_at\": \"2025-03-12T17:18:08.802744Z\",\n    \"project\": 1,\n    \"user\": 4\n}",
+							"raw": "{\n    \"id\": 2,\n    \"price\": \"300.00\",\n    \"propose_text\": \"Updated i got wat u want and am gonna do it \",\n    \"deadline\": 20,\n    \"project\": 1,\n    \"user\": 4\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -381,12 +399,12 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}proposal/3",
+							"raw": "{{url}}proposals/1",
 							"host": [
-								"{{url}}proposal"
+								"{{url}}proposals"
 							],
 							"path": [
-								"3"
+								"1"
 							]
 						}
 					},
@@ -395,6 +413,16 @@
 				{
 					"name": "Patch_Proposal",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMTQ0OTE3LCJpYXQiOjE3NDIxNDQ2MTcsImp0aSI6ImEzNTgwOTZiZjc2ODRkMWJhMzNkMDEzZGY5NTllYzZlIiwidXNlcl9pZCI6MX0.UqPIViCfXU-2gkiz_lgY07mSV3sjGeFuHojZw5vwkGA",
+									"type": "string"
+								}
+							]
+						},
 						"method": "PATCH",
 						"header": [],
 						"body": {
@@ -407,13 +435,13 @@
 							}
 						},
 						"url": {
-							"raw": "{{url}}/proposal/3",
+							"raw": "{{url}}/proposals/2",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"proposal",
-								"3"
+								"proposals",
+								"2"
 							]
 						}
 					},
@@ -422,16 +450,26 @@
 				{
 					"name": "Delete_Proposal",
 					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMTQ0OTE3LCJpYXQiOjE3NDIxNDQ2MTcsImp0aSI6ImEzNTgwOTZiZjc2ODRkMWJhMzNkMDEzZGY5NTllYzZlIiwidXNlcl9pZCI6MX0.UqPIViCfXU-2gkiz_lgY07mSV3sjGeFuHojZw5vwkGA",
+									"type": "string"
+								}
+							]
+						},
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/proposal/3",
+							"raw": "{{url}}/proposals/2",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"proposal",
-								"3"
+								"proposals",
+								"2"
 							]
 						}
 					},
@@ -443,9 +481,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}proposal/user/3",
+							"raw": "{{url}}proposals/user/3",
 							"host": [
-								"{{url}}proposal"
+								"{{url}}proposals"
 							],
 							"path": [
 								"user",
@@ -461,14 +499,41 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/proposal/project/1",
+							"raw": "{{url}}/proposals/project/1",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"proposal",
+								"proposals",
 								"project",
 								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search_In_Proposals",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}proposals/?user=3&project=1",
+							"host": [
+								"{{url}}proposals"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "3"
+								},
+								{
+									"key": "project",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -516,7 +581,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0MTk3NDE5MCwiaWF0IjoxNzQxODg3NzkwLCJqdGkiOiI3MWE3OWVlOTA5ZmQ0OWUxOWZlYzYwYzU5ZTZlMmViZiIsInVzZXJfaWQiOjF9.TUbwgtRJT_8uehDncHz08NQXw378DpyDbk9j1HOpWQk\"\n}",
+							"raw": "{\n    \"refresh\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0MzQzNDQ4OCwiaWF0IjoxNzQyMTM4NDg4LCJqdGkiOiIwNjAzNjZmMDhjZTA0NDMxODgyYTM3NDcwNjU3MjBhOSIsInVzZXJfaWQiOjF9.rAnhAEzGqhRGhZRQ1bRPGxHJ2JhZhYWWSRXeuxJXoo8\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -989,6 +1054,89 @@
 							"path": [
 								"update",
 								"6"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user_portforlio",
+			"item": [
+				{
+					"name": "Get_Portfolios",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}portfolios/?user=1",
+							"host": [
+								"{{url}}portfolios"
+							],
+							"path": [
+								""
+							],
+							"query": [
+								{
+									"key": "user",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Post_Portfolios",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQyMTUwNjAzLCJpYXQiOjE3NDIxNTAzMDMsImp0aSI6ImNmYjg4Yzc5YTU2ZjQwYTM5N2QxMDFmNGVhM2EwNzU5IiwidXNlcl9pZCI6MX0.Knk865VrdZN2tMVhFeZLe_b9ZI397yoKF1bZeadJIME",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "main_image",
+									"type": "file",
+									"src": "/home/aboelmagd/Downloads/background.jpg"
+								},
+								{
+									"key": "images",
+									"type": "file",
+									"src": [
+										"/home/aboelmagd/Downloads/gratisography-cool-cat-800x525.jpg",
+										"/home/aboelmagd/Pictures/Screenshots/Screenshot from 2025-03-13 19-35-04.png"
+									]
+								},
+								{
+									"key": "title",
+									"value": "Second Portfolio",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "This the Description of the second portfolio",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}portfolios/",
+							"host": [
+								"{{url}}portfolios"
+							],
+							"path": [
+								""
 							]
 						}
 					},

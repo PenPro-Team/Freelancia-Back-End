@@ -381,6 +381,8 @@ class SkillAPI(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request, id):
+        self.permission_classes = [AllowAny]
+
         skill = get_object_or_404(Skill, id=id)
         serializer = SkillSerializer(skill)
         return Response(serializer.data)

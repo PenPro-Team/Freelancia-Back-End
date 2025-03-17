@@ -422,6 +422,7 @@ class SkillAPI(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def skill_list(request):
     """
     View to list all skills.

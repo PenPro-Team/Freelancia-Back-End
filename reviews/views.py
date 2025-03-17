@@ -1,7 +1,8 @@
 
 from rest_framework import status
 from .serializers import ReviewSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Review
 from freelancia_back_end.models import User
 from rest_framework.response import Response
@@ -38,6 +39,7 @@ def create_review(request):
 
 # reviews that the user has received elhasanat
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_reviews(request, user_id):
     reviews = Review.objects.filter(user_reviewed=user_id)
     

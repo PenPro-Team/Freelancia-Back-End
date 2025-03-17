@@ -54,6 +54,7 @@ def proposal_by_project(request, id):
 
 
 class ProjectSearchFilterView(ListAPIView):
+    permission_classes = [AllowAny]
     serializer_class = ProjectSerializer
     queryset = Project.objects.all()
 
@@ -308,7 +309,7 @@ class ProposalAPI(APIView):
 
 # Project Views
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def ProjectView(request):
     """
     View to list all projects.

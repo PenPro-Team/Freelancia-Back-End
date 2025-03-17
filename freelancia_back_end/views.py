@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, UserSerializer
 from .models import BlackListedToken, Proposal, Skill, User, Project
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view , permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -260,6 +260,7 @@ class ProposalAPI(APIView):
 
 # Project Views
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def ProjectView(request):
     """
     View to list all projects.
@@ -274,6 +275,7 @@ class ProjectAPI(APIView):
     API view to handle create, update (PUT/PATCH), and delete operations for Project.
     """
     # Get One Project Detail
+    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
         project = get_object_or_404(Project, id=id)
@@ -285,7 +287,7 @@ class ProjectAPI(APIView):
     def post(self, request):
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(owner_id=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         # Return validation errors if data is not valid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -293,6 +295,9 @@ class ProjectAPI(APIView):
     # Full update of a project (replace the entire instance)
     def put(self, request, id):
         project = get_object_or_404(Project, pk=id)
+        # owner check
+        if project.owner_id != request.user:
+            return Response({"error": "Not authorized"}, status=403)
         serializer = ProjectSerializer(project, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -302,6 +307,9 @@ class ProjectAPI(APIView):
     # Partial update of a project (update only some fields)
     def patch(self, request, id):
         project = get_object_or_404(Project, pk=id)
+        # owner check
+        if project.owner_id != request.user:
+            return Response({"error": "Not authorized"}, status=403)
         serializer = ProjectSerializer(
             project, data=request.data, partial=True)
         if serializer.is_valid():
@@ -312,6 +320,9 @@ class ProjectAPI(APIView):
     # Delete a project
     def delete(self, request, id):
         project = get_object_or_404(Project, pk=id)
+        # owner check
+        if project.owner_id != request.user:
+            return Response({"error": "Not authorized"}, status=403)
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 

@@ -2,12 +2,50 @@ from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
+from freelancia import settings
+
 from .models import User , Project , Skill , Proposal
 
+from django.conf import settings
+from urllib.parse import urljoin
+
 class UserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            else:
+                return urljoin(settings.MEDIA_URL, str(obj.image))
+        return None
+
+    def get_name(self,obj):
+        if obj.name:
+            return obj.name
+        else:
+            return ""
+
+
     class Meta:
         model = User
         fields = '__all__'
+        read_only_fields = (
+            'id',
+            'role',
+            'is_staff',
+            'is_superuser',
+            'is_active',
+            'created_at',
+            'updated_at',
+            'rate',
+            'total_user_rated',
+            'groups',
+            'user_permissions',
+            'name',
+        )
 
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
@@ -27,7 +65,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         for skill in obj.skills.all():
             required_skills.append(skill.skill)
         return required_skills
-
+    owner_id = UserSerializer(read_only=True)
     class Meta:
         model = Project
         fields = [
@@ -83,7 +121,13 @@ class ProposalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Proposal
-        fields = ( 'id', 'price' , 'propose_text' , 'deadline' , 'created_at' , 'project', 'user')
+        fields = '__all__'
+        read_only_fields = (
+            'id',
+            'created_at',
+            'updated_at',
+            'user',
+        )
 
     def validate_price(self, value):
         if value <= 0:

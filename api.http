@@ -22,3 +22,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiY
 {
     "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc0MzI3NTA0NiwiaWF0IjoxNzQxOTc5MDQ2LCJqdGkiOiI5N2FjN2IxOTQ3ZGQ0MDA1YmIwOThiZTYwYjIwZjMwMyIsInVzZXJfaWQiOjF9.P7v_iwi0BPFqzYntrVscm-1G3tPdwEYTcYobg-nBjnI"
 }
+###
+POST http://localhost:8000/auth-token/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "username": "admin",
+    "password": "admin"
+}
+###
+GET http://127.0.0.1:8000/user/1/   HTTP/1.1
+Authorization: Token 59b080dca01c0731d06a9a3b2a84e47396ebc48f

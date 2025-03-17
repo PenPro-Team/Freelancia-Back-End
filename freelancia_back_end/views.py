@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-
+from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsOwnerOrAdminOrReadOnly
 from django.db import IntegrityError
 
@@ -189,22 +189,45 @@ User = get_user_model()
 # Custom Auth Token
 
 
-class CustomAuthToken(ObtainAuthToken):
+# class CustomAuthToken(ObtainAuthToken):
+#     def post(self, request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data,
+#                                            context={'request': request})
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token, created = Token.objects.get_or_create(user=user)
+#         return Response({
+#             'token': token.key,
+#             'user_id': user.pk,
+#             'email': user.email,
+#             'username': user.username,
+#             'role': user.role,
+#             'name': user.name,
+#             'rate': user.rate,
+#         })
+    
+class CustomAuthToken(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email,
-            'username': user.username,
-            'role': user.role,
-            'name': user.name,
-            'rate': user.rate,
-        })
+
+        response = super().post(request, *args, **kwargs)
+
+        if response.status_code == status.HTTP_200_OK:
+            user = get_object_or_404(User , username=request.data['username'])
+            image = user.image.url if user.image else None
+            if image:
+                image = request.build_absolute_uri(image)
+            print(image)
+            response.data.update({
+                'user_id': user.pk,
+                'email': user.email,
+                'username': user.username,
+                'role': user.role,
+                'name': user.name,
+                'rate': user.rate,
+                'image': image
+            })
+
+        return response
 
 # User Detail View
 

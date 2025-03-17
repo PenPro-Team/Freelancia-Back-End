@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, UserSerializer
 from .models import BlackListedToken, Proposal, Skill, User, Project
-from rest_framework.decorators import api_view , permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -196,6 +196,7 @@ class CustomAuthToken(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
+        user_serializer = UserSerializer(user)
         return Response({
             'token': token.key,
             'user_id': user.pk,
@@ -204,6 +205,8 @@ class CustomAuthToken(ObtainAuthToken):
             'role': user.role,
             'name': user.name,
             'rate': user.rate,
+            # 'image': user.image,
+            'image': user_serializer.data['image']
         })
 
 # User Detail View
@@ -219,6 +222,8 @@ class UserDetailView(APIView):
             'email': user.email,
             'username': user.username
         })
+
+# ------------------------------------------------------------------------
 
 
 class ProposalViewAndCreate(APIView):

@@ -325,7 +325,7 @@ class ProjectAPI(APIView):
     API view to handle create, update (PUT/PATCH), and delete operations for Project.
     """
     # Get One Project Detail
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request, id):
         project = get_object_or_404(Project, id=id)

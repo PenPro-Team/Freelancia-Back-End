@@ -308,7 +308,7 @@ class ProposalAPI(APIView):
 
 # Project Views
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny]) 
 def ProjectView(request):
     """
     View to list all projects.
@@ -327,6 +327,7 @@ class ProjectAPI(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
+        self.permission_classes = [AllowAny]
         project = get_object_or_404(Project, id=id)
         serializer = ProjectSerializer(project, context={'request': request})
         return Response(serializer.data)
@@ -334,12 +335,16 @@ class ProjectAPI(APIView):
     # Create a new project
 
     def post(self, request):
-        serializer = ProjectSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(owner_id=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        self.permission_classes = [IsAuthenticated]
+        print(request.user)
+        return Response({"error": "Not authorized"}, status=200)
+        # serializer = ProjectSerializer(data=request.data)
+        # if serializer.is_valid():
+            # print(request.user)
+            # serializer.save(owner_id=request.user)
+            # return Response(serializer.data, status=status.HTTP_201_CREATED)
         # Return validation errors if data is not valid
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Full update of a project (replace the entire instance)
     def put(self, request, id):
@@ -422,6 +427,7 @@ class SkillAPI(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def skill_list(request):
     """
     View to list all skills.

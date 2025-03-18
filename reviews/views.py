@@ -81,13 +81,15 @@ def get_project_reviews(request,project_id):
 
 
 @api_view(['PUT','PATCH'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def update_review(request,review_id):
     try:
         review=Review.objects.get(id=review_id)
     except Review.DoesNotExist:
         return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
+    if review.user_reviewr != request.user :
+        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     user=User.objects.get(id=review.user_reviewed.id)
     total_stars=user.rate*user.total_user_rated
     new_rate=request.data.get('rate')
@@ -98,10 +100,6 @@ def update_review(request,review_id):
     else:
         serializer = ReviewSerializer(instance=review, data=request.data, context={'request': request})
     
-    if review.user_reviewr != request.user :
-        print(f'curent user {review.user_reviewr}' )
-        print(f'this is the coming user {request.user}')
-        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     if serializer.is_valid():
         if  new_rate==None:
             serializer.save()
@@ -123,7 +121,7 @@ def update_review(request,review_id):
 def delete_review(request,review_id):
     try:
         review=Review.objects.get(id=review_id)
-        if review.user_reviewr.id != request.user.id and request.user.role != 'admin':
+        if review.user_reviewr!= request.user and request.user.role != 'admin':
             return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     except Review.DoesNotExist:
         return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND

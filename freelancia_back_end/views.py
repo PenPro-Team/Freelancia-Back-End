@@ -20,37 +20,6 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsOwnerOrAdminOrReadOnly
 from django.db import IntegrityError
 
-# Handles Proposals
-
-
-@api_view(['GET'])
-def proposal_list(request):
-    proposals = Proposal.objects.all()
-    serializer = ProposalSerializer(
-        proposals, many=True, context={'request': request})
-    # return JsonResponse({
-    #     'data' : serializer.data
-    # })
-    return Response(serializer.data)
-
-# Handle a single proposal
-
-
-@api_view(['GET'])
-def proposal_detail(request, id):
-    # proposal = Proposal.objects.get(id = 'id')
-    proposal = get_object_or_404(Proposal, id=id)
-    serializer = ProposalSerializer(proposal, context={'request': request})
-    return Response(serializer.data)
-
-
-@api_view(['GET'])
-def proposal_by_project(request, id):
-    project = get_object_or_404(Project, id=id)
-    proposals = Proposal.objects.filter(project=project)
-    serializer = ProposalSerializer(
-        proposals, many=True, context={'request': request})
-    return Response(serializer.data)
 
 
 class ProjectSearchFilterView(ListAPIView):
@@ -96,8 +65,30 @@ class ProjectSearchFilterView(ListAPIView):
 
         return queryset
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def proposal_list(request):
+    proposals = Proposal.objects.all()
+    serializer = ProposalSerializer(
+        proposals, many=True, context={'request': request})
+    # return JsonResponse({
+    #     'data' : serializer.data
+    # })
+    return Response(serializer.data)
+
+# Handle a single proposal
+
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
+def proposal_detail(request, id):
+    # proposal = Proposal.objects.get(id = 'id')
+    proposal = get_object_or_404(Proposal, id=id)
+    serializer = ProposalSerializer(proposal, context={'request': request})
+    return Response(serializer.data)
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
 def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
     proposals = Proposal.objects.filter(user=user)
@@ -108,6 +99,7 @@ def proposal_by_user(request, id):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def proposal_by_project(request, id):
     project = get_object_or_404(Project, id=id)
     proposals = Proposal.objects.filter(project=project)
@@ -119,6 +111,7 @@ def proposal_by_project(request, id):
 
 
 @api_view(['GET', 'POST'])
+@permission_classes([AllowAny])
 def userView(request):
     # GET
     if request.method == 'GET':
@@ -332,6 +325,7 @@ class ProposalAPI(APIView):
 
 # Project Views
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def ProjectView(request):
     """
     View to list all projects.
@@ -346,6 +340,7 @@ class ProjectAPI(APIView):
     """
     API view to handle create, update (PUT/PATCH), and delete operations for Project.
     """
+    permission_classes = [AllowAny]
     # Get One Project Detail
 
     def get(self, request, id):

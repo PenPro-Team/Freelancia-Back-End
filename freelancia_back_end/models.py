@@ -32,7 +32,8 @@ class User(AbstractUser):
     # Added To Make The Retrive of Data Faster
     rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     total_user_rated = models.IntegerField(default=0)
-
+    speciality = models.ForeignKey(
+        'Speciality', on_delete=models.SET_NULL, related_name='users', null=True, blank=True)
     role = models.CharField(max_length=10, choices=RoleChoices.choices)
 
     groups = models.ManyToManyField(
@@ -138,3 +139,16 @@ class BlackListedToken(models.Model):
 
     class Meta:
         unique_together = ("token", "user")
+
+
+class Speciality(models.Model):
+
+    title = models.CharField(max_length=128,unique=True)
+    description = models.TextField()
+    def __str__(self):
+        return self.title
+    class Meta:
+        verbose_name_plural = "Specialities"
+
+    # ! to link one specialites to one users <Commented until conmfirmed>
+    # user_id = models.ManyToManyField(User)

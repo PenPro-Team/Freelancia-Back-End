@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, UserSerializer
-from .models import BlackListedToken, Proposal, Skill, User, Project
+from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, SpecialitySerializer, UserSerializer
+from .models import BlackListedToken, Proposal, Skill, Speciality, User, Project
 from rest_framework.decorators import api_view , permission_classes
 from rest_framework.response import Response
 from rest_framework import status
@@ -234,7 +234,9 @@ class UserDetailView(APIView):
         return Response({
             'user_id': user.pk,
             'email': user.email,
-            'username': user.username
+            'username': user.username,
+            'role': user.role,
+            'name': user.name,
         })
 
 
@@ -397,10 +399,10 @@ class ProjectAPI(APIView):
 
 # Skill API views
 class SkillAPI(APIView):
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    # permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request, id):
-        self.permission_classes = [AllowAny]
+        # self.permission_classes = [AllowAny]
 
         skill = get_object_or_404(Skill, id=id)
         serializer = SkillSerializer(skill)
@@ -449,3 +451,56 @@ def skill_list(request):
     skills = Skill.objects.all()
     serializer = SkillSerializer(skills, many=True)
     return Response(serializer.data)
+
+
+
+# speciality API view
+
+class SpecialityView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def get(self, request,id=None):
+        if id:
+            try:
+                speciality = Speciality.objects.get(id=id)
+                serializer = SpecialitySerializer(speciality)
+                return Response(serializer.data)
+            except Speciality.DoesNotExist:
+                return Response(status=status.HTTP_404_NOT_FOUND)
+        else:
+            specialities = Speciality.objects.all()
+            serializer = SpecialitySerializer(specialities, many=True)
+            return Response(serializer.data)
+
+    def post(self, request):
+        user = request.user
+        serializer = SpecialitySerializer(data=request.data)
+        if user.role == User.RoleChoices.admin:
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        user = request.user
+        if user.role == User.RoleChoices.admin:
+            user.speciality = request.data['speciality']
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request):
+        user = request.user
+        if user.role == User.RoleChoices.admin:
+            user.speciality = request.data['speciality']
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        user = request.user
+        if user.role == User.RoleChoices.admin:
+            user.speciality = None
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)

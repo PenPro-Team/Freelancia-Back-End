@@ -4,17 +4,27 @@ from rest_framework.decorators import api_view
 
 from freelancia import settings
 
-from .models import User , Project , Skill , Proposal
+from .models import Speciality, User , Project , Skill , Proposal
 
 from django.conf import settings
 from urllib.parse import urljoin
 
 from django.contrib.auth.hashers import make_password
 
+class SpecialitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Speciality
+        fields = '__all__'
+
 class UserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
-
+    speciality_details = SpecialitySerializer(source='speciality', read_only=True)
+    speciality = serializers.PrimaryKeyRelatedField(
+        queryset=Speciality.objects.all(),
+        required=False,
+        allow_null=True
+    )
     def get_image(self, obj):
         if obj.image:
             request = self.context.get('request')

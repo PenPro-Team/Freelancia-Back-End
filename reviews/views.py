@@ -1,13 +1,15 @@
 
 from rest_framework import status
 from .serializers import ReviewSerializer
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Review
 from freelancia_back_end.models import User
 from rest_framework.response import Response
 # Create your views here.
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def create_review(request):
 
     user_reviewer_id=request.data.get('user_reviewr')
@@ -26,7 +28,7 @@ def create_review(request):
     
     
 
-    serializer = ReviewSerializer(data=request.data)
+    serializer = ReviewSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         total_stars+=request.data['rate']
         user.total_user_rated+=1
@@ -38,6 +40,7 @@ def create_review(request):
 
 # reviews that the user has received elhasanat
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_reviews(request, user_id):
     reviews = Review.objects.filter(user_reviewed=user_id)
     
@@ -47,12 +50,12 @@ def get_reviews(request, user_id):
             status=status.HTTP_404_NOT_FOUND
         )
     
-    serializer = ReviewSerializer(reviews, many=True)
+    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
     return Response(serializer.data,status=status.HTTP_200_OK)
 
 #  reviews that the user has made elsyeate
-
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_user_reviwes (request, user_id):
     reviews = Review.objects.filter(user_reviewr=user_id)
     
@@ -62,39 +65,40 @@ def get_user_reviwes (request, user_id):
             status=status.HTTP_404_NOT_FOUND
         )
     
-    serializer = ReviewSerializer(reviews, many=True)
+    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_project_reviews(request,project_id):
     reviews=Review.objects.filter(project=project_id)
     if not reviews.exists():
         return Response({'message': 'The project does not have any reviews'}, status=status.HTTP_404_NOT_FOUND)
-    serializer = ReviewSerializer(reviews, many=True)
+    serializer = ReviewSerializer(reviews, many=True, context={'request': request})
     return Response(serializer.data,  status=status.HTTP_200_OK)
 
 
 
 @api_view(['PUT','PATCH'])
+@permission_classes([IsAuthenticated])
 def update_review(request,review_id):
-    if review.user_reviewr !=request.user:
-        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     try:
         review=Review.objects.get(id=review_id)
     except Review.DoesNotExist:
         return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND)
     
+    if review.user_reviewr != request.user :
+        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     user=User.objects.get(id=review.user_reviewed.id)
     total_stars=user.rate*user.total_user_rated
     new_rate=request.data.get('rate')
-    
-    print(f'curent user {review.user_reviewr}' )
-    print(f'this is the coming user {request.user}')
+  
+   
     if request.method == 'PATCH':
-        serializer = ReviewSerializer(instance=review, data=request.data, partial=True)
+        serializer = ReviewSerializer(instance=review, data=request.data, partial=True, context={'request': request})
     else:
-        serializer = ReviewSerializer(instance=review, data=request.data)
+        serializer = ReviewSerializer(instance=review, data=request.data, context={'request': request})
     
     if serializer.is_valid():
         if  new_rate==None:
@@ -113,11 +117,12 @@ def update_review(request,review_id):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
 def delete_review(request,review_id):
-    if review.user_reviewr != request.user and request.user.role != 'admin':
-        return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     try:
         review=Review.objects.get(id=review_id)
+        if review.user_reviewr!= request.user and request.user.role != 'admin':
+            return Response({'message': 'You are not the owner of this review'}, status=status.HTTP_403_FORBIDDEN)
     except Review.DoesNotExist:
         return Response({'message': 'The review does not exist'}, status=status.HTTP_404_NOT_FOUND
 )

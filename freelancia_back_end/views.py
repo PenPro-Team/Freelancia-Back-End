@@ -353,15 +353,12 @@ class ProjectAPI(APIView):
 
     def post(self, request):
         self.permission_classes = [IsAuthenticated]
-        print(request.user)
-        return Response({"error": "Not authorized"}, status=200)
-        # serializer = ProjectSerializer(data=request.data)
-        # if serializer.is_valid():
-            # print(request.user)
-            # serializer.save(owner_id=request.user)
-            # return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # Return validation errors if data is not valid
-        # return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer = ProjectSerializer(data=request.data)
+        if serializer.is_valid():
+            print(request.user)
+            serializer.save(owner_id=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Full update of a project (replace the entire instance)
     def put(self, request, id):

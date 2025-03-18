@@ -9,6 +9,8 @@ from .models import Speciality, User , Project , Skill , Proposal
 from django.conf import settings
 from urllib.parse import urljoin
 
+from django.contrib.auth.hashers import make_password
+
 class SpecialitySerializer(serializers.ModelSerializer):
     class Meta:
         model = Speciality
@@ -56,6 +58,9 @@ class UserSerializer(serializers.ModelSerializer):
             'user_permissions',
             'name',
         )
+    def create(self, validated_data):
+        validated_data['password'] = make_password(validated_data.get('password'))
+        return super().create(validated_data)
 
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:

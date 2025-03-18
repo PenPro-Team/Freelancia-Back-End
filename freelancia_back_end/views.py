@@ -344,6 +344,7 @@ class ProjectAPI(APIView):
     # Get One Project Detail
 
     def get(self, request, id):
+        self.permission_classes = [AllowAny]
         project = get_object_or_404(Project, id=id)
         serializer = ProjectSerializer(project, context={'request': request})
         return Response(serializer.data)
@@ -351,11 +352,12 @@ class ProjectAPI(APIView):
     # Create a new project
 
     def post(self, request):
+        self.permission_classes = [IsAuthenticated]
         serializer = ProjectSerializer(data=request.data)
         if serializer.is_valid():
+            print(request.user)
             serializer.save(owner_id=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        # Return validation errors if data is not valid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     # Full update of a project (replace the entire instance)

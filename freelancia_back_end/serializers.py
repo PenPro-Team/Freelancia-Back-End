@@ -54,7 +54,7 @@ class UserSerializer(serializers.ModelSerializer):
             'is_active',
             'created_at',
             'updated_at',
-            'rate',
+            # 'rate',
             'total_user_rated',
             'groups',
             'user_permissions',

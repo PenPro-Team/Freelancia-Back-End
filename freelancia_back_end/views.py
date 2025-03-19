@@ -188,25 +188,6 @@ class LogoutView(APIView):
 
 User = get_user_model()
 
-# Custom Auth Token
-
-
-# class CustomAuthToken(ObtainAuthToken):
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data,
-#                                            context={'request': request})
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response({
-#             'token': token.key,
-#             'user_id': user.pk,
-#             'email': user.email,
-#             'username': user.username,
-#             'role': user.role,
-#             'name': user.name,
-#             'rate': user.rate,
-#         })
 
 class CustomAuthToken(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
@@ -251,13 +232,6 @@ class UserDetailView(APIView):
 
 
 class ProposalViewAndCreate(APIView):
-    # permission_classes = [AllowAny]
-
-    # def get_permissions(self):
-    #     self.permission_classes = [AllowAny]
-    #     if self.request.method == 'POST':
-    #         self.permission_classes = [IsAuthenticated , IsAdminUser]
-    #     return super().get_permissions()
 
     def get_permissions(self):
         return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
@@ -513,3 +487,35 @@ class SpecialityView(APIView):
             user.save()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# Highest Rated Freelanc View
+
+
+class HighestRatedFreelancersView(APIView):
+    permission_classes = [AllowAny]  # Adjust permissions as needed
+
+    def get(self, request):
+        # Filter users with the role 'freelancer' and order by rate in descending order
+        freelancers = User.objects.filter(
+            role=User.RoleChoices.freelancer).order_by('-rate')[:5]
+
+        # Serialize the filtered users
+        serializer = UserSerializer(
+            freelancers, many=True, context={'request': request})
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class HighestRatedClientsView(APIView):
+    permission_classes = [AllowAny]  # Adjust permissions as needed
+
+    def get(self, request):
+        # Filter users with the role 'freelancer' and order by rate in descending order
+        clients = User.objects.filter(
+            role=User.RoleChoices.client).order_by('-rate')[:4]
+
+        # Serialize the filtered users
+        serializer = UserSerializer(
+            clients, many=True, context={'request': request})
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

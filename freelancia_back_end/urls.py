@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 
-from freelancia_back_end.views import CustomAuthToken, LogoutView,SpecialityView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, ProposalViewAndCreate, SkillAPI, UserDetailView, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
+from freelancia_back_end.views import CustomAuthToken, HighestRatedClientsView, HighestRatedFreelancersView, LogoutView, SpecialityView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, ProposalViewAndCreate, SkillAPI, UserDetailView, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
 
 urlpatterns = [
     # Proposal Read (get) API
@@ -41,4 +41,8 @@ urlpatterns = [
     path('user/<int:pk>/', UserDetailView.as_view(), name='user_detail'),
     path('speciality/', SpecialityView.as_view(), name='speciality_list'),
     path('speciality/<int:id>/', SpecialityView.as_view(), name='speciality_api'),
+    path('freelancers/highest-rated/', HighestRatedFreelancersView.as_view(),
+         name='highest_rated_freelancers'),
+    path('clients/highest-rated/', HighestRatedClientsView.as_view(),
+         name='highest_rated_clients'),
 ]

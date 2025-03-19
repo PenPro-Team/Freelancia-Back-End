@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, SpecialitySerializer, UserSerializer
 from .models import BlackListedToken, Proposal, Skill, Speciality, User, Project
-from rest_framework.decorators import api_view , permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
@@ -19,7 +19,6 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsOwnerOrAdminOrReadOnly
 from django.db import IntegrityError
-
 
 
 class ProjectSearchFilterView(ListAPIView):
@@ -65,6 +64,7 @@ class ProjectSearchFilterView(ListAPIView):
 
         return queryset
 
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def proposal_list(request):
@@ -86,6 +86,7 @@ def proposal_detail(request, id):
     proposal = get_object_or_404(Proposal, id=id)
     serializer = ProposalSerializer(proposal, context={'request': request})
     return Response(serializer.data)
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -115,8 +116,15 @@ def proposal_by_project(request, id):
 def userView(request):
     # GET
     if request.method == 'GET':
+        username = request.query_params.get('username', None)
+        email = request.query_params.get('email', None)
         # Get All Data From User Table
         user = User.objects.all()
+        if username:
+            user = user.filter(username=username)
+        if email:
+            user = user.filter(email=email)
+
         serializer = UserSerializer(
             user, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -180,33 +188,14 @@ class LogoutView(APIView):
 
 User = get_user_model()
 
-# Custom Auth Token
 
-
-# class CustomAuthToken(ObtainAuthToken):
-#     def post(self, request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data,
-#                                            context={'request': request})
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         token, created = Token.objects.get_or_create(user=user)
-#         return Response({
-#             'token': token.key,
-#             'user_id': user.pk,
-#             'email': user.email,
-#             'username': user.username,
-#             'role': user.role,
-#             'name': user.name,
-#             'rate': user.rate,
-#         })
-    
 class CustomAuthToken(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
 
         response = super().post(request, *args, **kwargs)
 
         if response.status_code == status.HTTP_200_OK:
-            user = get_object_or_404(User , username=request.data['username'])
+            user = get_object_or_404(User, username=request.data['username'])
             image = user.image.url if user.image else None
             if image:
                 image = request.build_absolute_uri(image)
@@ -239,15 +228,10 @@ class UserDetailView(APIView):
             'name': user.name,
         })
 
+# ------------------------------------------------------------------------
+
 
 class ProposalViewAndCreate(APIView):
-    # permission_classes = [AllowAny]
-
-    # def get_permissions(self):
-    #     self.permission_classes = [AllowAny]
-    #     if self.request.method == 'POST':
-    #         self.permission_classes = [IsAuthenticated , IsAdminUser]
-    #     return super().get_permissions()
 
     def get_permissions(self):
         return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
@@ -453,13 +437,12 @@ def skill_list(request):
     return Response(serializer.data)
 
 
-
 # speciality API view
 
 class SpecialityView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
 
-    def get(self, request,id=None):
+    def get(self, request, id=None):
         if id:
             try:
                 speciality = Speciality.objects.get(id=id)
@@ -504,3 +487,35 @@ class SpecialityView(APIView):
             user.save()
             return Response(status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
+
+# Highest Rated Freelanc View
+
+
+class HighestRatedFreelancersView(APIView):
+    permission_classes = [AllowAny]  # Adjust permissions as needed
+
+    def get(self, request):
+        # Filter users with the role 'freelancer' and order by rate in descending order
+        freelancers = User.objects.filter(
+            role=User.RoleChoices.freelancer).order_by('-rate')[:5]
+
+        # Serialize the filtered users
+        serializer = UserSerializer(
+            freelancers, many=True, context={'request': request})
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class HighestRatedClientsView(APIView):
+    permission_classes = [AllowAny]  # Adjust permissions as needed
+
+    def get(self, request):
+        # Filter users with the role 'freelancer' and order by rate in descending order
+        clients = User.objects.filter(
+            role=User.RoleChoices.client).order_by('-rate')[:4]
+
+        # Serialize the filtered users
+        serializer = UserSerializer(
+            clients, many=True, context={'request': request})
+
+        return Response(serializer.data, status=status.HTTP_200_OK)

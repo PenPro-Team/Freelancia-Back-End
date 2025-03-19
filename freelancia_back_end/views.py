@@ -115,8 +115,15 @@ def proposal_by_project(request, id):
 def userView(request):
     # GET
     if request.method == 'GET':
+        username = request.query_params.get('username', None)
+        email = request.query_params.get('email', None)
         # Get All Data From User Table
         user = User.objects.all()
+        if username:
+            user = user.filter(username=username)
+        if email:
+            user = user.filter(email=email) 
+
         serializer = UserSerializer(
             user, many=True, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)

@@ -5,6 +5,9 @@ from freelancia_back_end.models import User
 from freelancia_back_end.serializers import UserSerializer as BaseUserSerializer
 
 class UserSerializer(BaseUserSerializer):
+    image = serializers.SerializerMethodField()
+    def get_image(self, obj):
+       return super().get_image(obj)
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name','image') 

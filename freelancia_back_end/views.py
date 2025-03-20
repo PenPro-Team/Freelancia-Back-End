@@ -512,7 +512,7 @@ class HighestRatedFreelancersView(APIView):
     def get(self, request):
         # Filter users with the role 'freelancer' and order by rate in descending order
         freelancers = User.objects.filter(
-            role=User.RoleChoices.freelancer).order_by('-rate')[:5]
+            role=User.RoleChoices.freelancer).order_by('-rate')[:6]
 
         # Serialize the filtered users
         serializer = UserSerializer(

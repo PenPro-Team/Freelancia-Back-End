@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+# This is the manage.py file that Django uses to run administrative tasks.
+# It is a Python script that runs the Django project.
 import os
 import sys
 

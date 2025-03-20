@@ -1,7 +1,11 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
+from rest_framework.routers import DefaultRouter
+from django.conf import settings
+from django.conf.urls.static import static
 
-from freelancia_back_end.views import CustomAuthToken, HighestRatedClientsView, HighestRatedFreelancersView, LogoutView, SpecialityView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, ProposalViewAndCreate, SkillAPI, UserDetailView, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
+from freelancia_back_end.views import CertificateViewSet, CustomAuthToken, HighestRatedClientsView, HighestRatedFreelancersView, LogoutView, SpecialityView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, ProposalViewAndCreate, SkillAPI, UserDetailView, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
+
 
 urlpatterns = [
     # Proposal Read (get) API
@@ -45,4 +49,10 @@ urlpatterns = [
          name='highest_rated_freelancers'),
     path('clients/highest-rated/', HighestRatedClientsView.as_view(),
          name='highest_rated_clients'),
+
+    # Certificates endpoints
+    path('certificates/', CertificateViewSet.as_view(
+        {'get': 'list', 'post': 'create'}), name='certificate_list'),
+    path('certificates/<int:id>/', CertificateViewSet.as_view(
+        {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='certificate_detail'),
 ]

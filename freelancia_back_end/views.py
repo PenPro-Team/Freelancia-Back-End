@@ -1,10 +1,10 @@
 from django.shortcuts import render
 from django.http import JsonResponse
-from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, SpecialitySerializer, UserSerializer
-from .models import BlackListedToken, Proposal, Skill, Speciality, User, Project
+from .serializers import ProjectSerializer, ProposalSerializer, SkillSerializer, SpecialitySerializer, UserSerializer, CertificateSerializer
+from .models import BlackListedToken, Proposal, Skill, Speciality, User, Project, Certificate
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, viewsets
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter, OrderingFilter
@@ -167,7 +167,7 @@ def userDetailView(request, pk):
             image = user.image.url if user.image else None
             if image:
                 image = request.build_absolute_uri(image)
-            return Response({"image":image},status=status.HTTP_200_OK)
+            return Response({"image": image}, status=status.HTTP_200_OK)
         # print(request.data["delete_image"])
         if request.data["image"] == None:
             user.image.delete()
@@ -232,7 +232,6 @@ class CustomAuthToken(TokenObtainPairView):
 
 
 class UserDetailView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, pk):
         user = get_object_or_404(User, pk=pk)
@@ -535,3 +534,29 @@ class HighestRatedClientsView(APIView):
             clients, many=True, context={'request': request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# ------------------------------------------------------------------------
+
+class CertificateViewSet(viewsets.ModelViewSet):
+    queryset = Certificate.objects.all()
+    serializer_class = CertificateSerializer
+    permission_classes = [IsAuthenticated]  # Require authentication
+
+    def get_queryset(self):
+        # Return certificates for the logged-in user
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically associate the certificate with the logged-in user
+        serializer.save(user=self.request.user)
+
+    # Disable PUT, PATCH, and DELETE actions
+    def update(self, request, *args, **kwargs):
+        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def partial_update(self, request, *args, **kwargs):
+        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def destroy(self, request, *args, **kwargs):
+        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)

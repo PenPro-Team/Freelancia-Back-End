@@ -2,6 +2,14 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
+class Skill(models.Model):
+    id = models.AutoField(primary_key=True)
+    skill = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.skill
+
+
 class User(AbstractUser):
     class RoleChoices(models.TextChoices):
         admin = 'admin'
@@ -23,6 +31,10 @@ class User(AbstractUser):
     address = models.CharField(max_length=255, null=True, blank=True)
     postal_code = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    skills = models.ManyToManyField(Skill, related_name="users")
+
+    # certificate = models.ManyToManyField(
+    #     Certificate, on_delete=models.CASCADE, related_name='certificates')
 
     # Added By A.AboEl-Magd , to referes to Profile Picture
     image = models.ImageField(blank=True, null=True)
@@ -62,7 +74,7 @@ class User(AbstractUser):
             elif self.role == self.RoleChoices.freelancer:
                 self.is_staff = False
                 self.is_superuser = False
-                
+
         if self.is_staff and self.is_superuser:
             self.role = self.RoleChoices.admin
 
@@ -70,14 +82,6 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-
-
-class Skill(models.Model):
-    id = models.AutoField(primary_key=True)
-    skill = models.CharField(max_length=255, unique=True)
-
-    def __str__(self):
-        return self.skill
 
 
 class Project(models.Model):
@@ -130,10 +134,6 @@ class Proposal(models.Model):
     def __str__(self):
         return f'{self.user.username} - {self.project.project_name}'
 
-class ProposalImage(models.Model):
-    Proposal = models.ForeignKey(Proposal, on_delete=models.CASCADE , related_name='images')
-    image = models.ImageField()
-    
 
 class BlackListedToken(models.Model):
     token = models.CharField(max_length=500)
@@ -147,12 +147,31 @@ class BlackListedToken(models.Model):
 
 class Speciality(models.Model):
 
-    title = models.CharField(max_length=128,unique=True)
+    title = models.CharField(max_length=128, unique=True)
     description = models.TextField()
+
     def __str__(self):
         return self.title
+
     class Meta:
         verbose_name_plural = "Specialities"
 
     # ! to link one specialites to one users <Commented until conmfirmed>
     # user_id = models.ManyToManyField(User)
+
+
+class Certificate(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True, null=True)
+    issued_by = models.CharField(max_length=255)
+    issued_date = models.DateField()
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='certificates')
+    image = models.ImageField(
+        upload_to='certificates/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title

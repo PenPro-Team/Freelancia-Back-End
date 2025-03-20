@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view
 
 from freelancia import settings
 
-from .models import Speciality, User, Project, Skill, Proposal
+from .models import Certificate, Speciality, User, Project, Skill, Proposal
 
 from django.conf import settings
 from urllib.parse import urljoin
@@ -18,6 +18,12 @@ class SpecialitySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = '__all__'
+
+
 class UserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()
@@ -28,6 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+    skills = SkillSerializer(many=True, read_only=True)
 
     def get_image(self, obj):
         if obj.image:
@@ -66,12 +73,6 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data['password'] = make_password(
             validated_data.get('password'))
         return super().create(validated_data)
-
-
-class SkillSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Skill
-        fields = '__all__'
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -167,3 +168,14 @@ class ProposalSerializer(serializers.ModelSerializer):
             serializers.ValidationError(
                 "Deadline must be greater than zero days")
         return value
+
+
+class CertificateSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(
+        read_only=True)  # Automatically set the user
+    image = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = Certificate
+        fields = '__all__'
+        read_only_fields = ('id', 'created_at', 'updated_at', 'user')

@@ -1,3 +1,4 @@
+# This file to ignore pyton cache files and enviroment files
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

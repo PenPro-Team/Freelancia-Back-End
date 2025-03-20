@@ -147,6 +147,7 @@ def userDetailView(request, pk):
 
     if request.method == 'GET':
         serializer = UserSerializer(user, context={'request': request})
+        # print(serializer.data["image"])
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
@@ -158,9 +159,24 @@ def userDetailView(request, pk):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'PATCH':
+        if 'image' in request.FILES:
+            if user.image:
+                user.image.delete()
+            user.image = request.FILES['image']
+            user.save()
+            image = user.image.url if user.image else None
+            if image:
+                image = request.build_absolute_uri(image)
+            return Response({"image":image},status=status.HTTP_200_OK)
+        # print(request.data["delete_image"])
+        if request.data["image"] == None:
+            user.image.delete()
+            user.image = None
+            user.save()
         serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
+            print(serializer.data["image"])
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

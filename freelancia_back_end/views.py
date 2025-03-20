@@ -167,7 +167,7 @@ def userDetailView(request, pk):
             image = user.image.url if user.image else None
             if image:
                 image = request.build_absolute_uri(image)
-            return Response({"image":image},status=status.HTTP_200_OK)
+            return Response({"image": image}, status=status.HTTP_200_OK)
         # print(request.data["delete_image"])
         if request.data["image"] == None:
             user.image.delete()

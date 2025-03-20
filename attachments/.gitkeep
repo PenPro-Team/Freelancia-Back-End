@@ -1,4 +1,1 @@
-# Ignore everything in this folder
-*
-# But don't ignore this file
-!.gitignore
+# I kept this file to keep it in git

@@ -59,7 +59,7 @@ class UserSerializer(serializers.ModelSerializer):
             'groups',
             'user_permissions',
             'name',
-            'image',
+            # 'image',
         )
 
     def create(self, validated_data):

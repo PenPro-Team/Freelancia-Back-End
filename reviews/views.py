@@ -1,4 +1,5 @@
 
+import decimal
 from rest_framework import status
 from .serializers import ReviewSerializer
 from rest_framework.decorators import api_view, permission_classes
@@ -30,7 +31,7 @@ def create_review(request):
 
     serializer = ReviewSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
-        total_stars+=request.data['rate']
+        total_stars+=decimal.Decimal(request.data['rate'])
         user.total_user_rated+=1
         user.rate=total_stars/user.total_user_rated
         user.save()

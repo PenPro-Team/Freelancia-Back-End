@@ -161,6 +161,7 @@ class Speciality(models.Model):
 
 
 class Certificate(models.Model):
+
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
@@ -172,6 +173,10 @@ class Certificate(models.Model):
         upload_to='certificates/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    # to link one certificate to one users
+    class Meta:
+        unique_together = ('title', 'user')
 
     def __str__(self):
         return self.title

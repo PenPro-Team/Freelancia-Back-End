@@ -3,9 +3,10 @@ from . import views
 from rest_framework.routers import DefaultRouter
 from django.conf import settings
 from django.conf.urls.static import static
-
 from freelancia_back_end.views import CertificateViewSet, CustomAuthToken, HighestRatedClientsView, HighestRatedFreelancersView, LogoutView, SpecialityView, ProjectSearchFilterView, ProjectAPI, ProjectView, ProposalAPI, ProposalViewAndCreate, SkillAPI, UserDetailView, proposal_by_project, proposal_by_user, proposal_detail, proposal_list, skill_list, userView
 
+router = DefaultRouter()
+router.register(r'certificates', CertificateViewSet, basename='certificate')
 
 urlpatterns = [
     # Proposal Read (get) API
@@ -55,4 +56,8 @@ urlpatterns = [
         {'get': 'list', 'post': 'create'}), name='certificate_list'),
     path('certificates/<int:id>/', CertificateViewSet.as_view(
         {'get': 'retrieve', 'put': 'update', 'patch': 'partial_update', 'delete': 'destroy'}), name='certificate_detail'),
+
+    path('', include(router.urls)),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -19,6 +19,7 @@ from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsOwnerOrAdminOrReadOnly
 from django.db import IntegrityError
+from rest_framework.exceptions import PermissionDenied
 
 
 class ProjectSearchFilterView(ListAPIView):
@@ -35,30 +36,22 @@ class ProjectSearchFilterView(ListAPIView):
         search = self.request.GET.get('search', '').strip()
         skills = self.request.GET.get('skills', '').strip().split(',')
         states = self.request.GET.get('states', '').strip().split(',')
-        # state_query = Q()
         filter_query = Q()
-        # skills_query = Q()
-        # print(filter_query)
         if skills and not skills == ['']:
-            # print(skills)
             skills_query = Q()
             for skill in skills:
                 skills_query |= Q(skills__skill__icontains=skill)
             filter_query &= skills_query
-            # queryset = queryset.filter(skills_query).distinct()
         if states and not states == ['']:
             # print(states)
             states_query = Q()
             for state in states:
                 states_query |= Q(project_state__iexact=state)
             filter_query &= states_query
-            # queryset = queryset.filter(state_query).distinct()
         if search:
             search_query = Q(project_name__icontains=search) | Q(
                 project_description__icontains=search)
             filter_query &= search_query
-            # queryset = queryset.filter(Q(project_name__icontains=search) | Q(project_description__icontains=search))
-        # print(filter_query)
         queryset = queryset.filter(
             filter_query).distinct() if filter_query else queryset
 
@@ -71,9 +64,7 @@ def proposal_list(request):
     proposals = Proposal.objects.all()
     serializer = ProposalSerializer(
         proposals, many=True, context={'request': request})
-    # return JsonResponse({
-    #     'data' : serializer.data
-    # })
+
     return Response(serializer.data)
 
 # Handle a single proposal
@@ -82,7 +73,6 @@ def proposal_list(request):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def proposal_detail(request, id):
-    # proposal = Proposal.objects.get(id = 'id')
     proposal = get_object_or_404(Proposal, id=id)
     serializer = ProposalSerializer(proposal, context={'request': request})
     return Response(serializer.data)
@@ -93,7 +83,6 @@ def proposal_detail(request, id):
 def proposal_by_user(request, id):
     user = get_object_or_404(User, id=id)
     proposals = Proposal.objects.filter(user=user)
-    # proposals = user.proposals.all()
     serializer = ProposalSerializer(
         proposals, many=True, context={'request': request})
     return Response(serializer.data)
@@ -104,8 +93,6 @@ def proposal_by_user(request, id):
 def proposal_by_project(request, id):
     project = get_object_or_404(Project, id=id)
     proposals = Proposal.objects.filter(project=project)
-    # proposals = project.proposals.all()
-    # print(proposals)
     serializer = ProposalSerializer(
         proposals, many=True, context={'request': request})
     return Response(serializer.data)
@@ -136,8 +123,9 @@ def userView(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 # Get User By Id
+
+
 @api_view(['GET', 'PUT', 'DELETE', 'PATCH'])
 def userDetailView(request, pk):
     try:
@@ -147,7 +135,6 @@ def userDetailView(request, pk):
 
     if request.method == 'GET':
         serializer = UserSerializer(user, context={'request': request})
-        # print(serializer.data["image"])
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
@@ -168,7 +155,6 @@ def userDetailView(request, pk):
             if image:
                 image = request.build_absolute_uri(image)
             return Response({"image": image}, status=status.HTTP_200_OK)
-        # print(request.data["delete_image"])
         if request.data["image"] == None:
             user.image.delete()
             user.image = None
@@ -398,10 +384,8 @@ class ProjectAPI(APIView):
 
 # Skill API views
 class SkillAPI(APIView):
-    # permission_classes = [IsAuthenticated, IsAdminUser]
 
     def get(self, request, id):
-        # self.permission_classes = [AllowAny]
 
         skill = get_object_or_404(Skill, id=id)
         serializer = SkillSerializer(skill)
@@ -451,8 +435,8 @@ def skill_list(request):
     serializer = SkillSerializer(skills, many=True)
     return Response(serializer.data)
 
-
 # speciality API view
+
 
 class SpecialityView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
@@ -539,24 +523,34 @@ class HighestRatedClientsView(APIView):
 # ------------------------------------------------------------------------
 
 class CertificateViewSet(viewsets.ModelViewSet):
-    queryset = Certificate.objects.all()
+    # A ViewSet for managing certificates. Certificates are automatically associated with the logged-in user.
     serializer_class = CertificateSerializer
-    permission_classes = [IsAuthenticated]  # Require authentication
+    # Only authenticated users can access this endpoint
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Return certificates for the logged-in user
-        return self.queryset.filter(user=self.request.user)
+        # Return only certificates associated with the logged-in user.
+        return Certificate.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        # Automatically associate the certificate with the logged-in user
+       # Automatically assign the logged in user to the certificate upon creation.
         serializer.save(user=self.request.user)
 
-    # Disable PUT, PATCH, and DELETE actions
-    def update(self, request, *args, **kwargs):
-        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-    def partial_update(self, request, *args, **kwargs):
-        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    def perform_update(self, serializer):
+        # Ensure the certificate being updated belongs to the loged in user
+        instance = self.get_object()
+        if instance.user != self.request.user:
+            raise PermissionDenied(
+                "You can only update your own certificates.")
+        serializer.save()
 
     def destroy(self, request, *args, **kwargs):
-        return Response({"detail": "Method not allowed"}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        # Allow users to delete only their own certificates.
+        instance = self.get_object()
+        if instance.user != self.request.user:
+            return Response(
+                {"detail": "You can only delete your own certificates."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

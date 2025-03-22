@@ -130,7 +130,7 @@ def userView(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     # POST
     elif request.method == 'POST':
-        serializer = UserSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data , context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -151,7 +151,7 @@ def userDetailView(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        serializer = UserSerializer(user, data=request.data)
+        serializer = UserSerializer(user, data=request.data , context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -169,13 +169,15 @@ def userDetailView(request, pk):
                 image = request.build_absolute_uri(image)
             return Response({"image": image}, status=status.HTTP_200_OK)
         # print(request.data["delete_image"])
-        if request.data["image"] == None:
-            user.image.delete()
-            user.image = None
-            user.save()
-        serializer = UserSerializer(user, data=request.data, partial=True)
+        if "image" in request.data:
+            if request.data["image"] == None:
+                user.image.delete()
+                user.image = None
+                user.save()
+        serializer = UserSerializer(user, data=request.data, partial=True , context={'request': request})
         if serializer.is_valid():
             serializer.save()
+            
             print(serializer.data["image"])
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:

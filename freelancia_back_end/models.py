@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission , BaseUserManager
 
 
 class Skill(models.Model):
@@ -8,6 +8,50 @@ class Skill(models.Model):
 
     def __str__(self):
         return self.skill
+
+
+class UserManager(BaseUserManager):
+    def create_user(self, username = None, email = None, password = None, first_name = None, last_name = None, role  = None , **extra_fields):
+        if not username:
+            raise ValueError("The given username must be set")
+        
+        if not email:
+            raise ValueError("The given email must be set")
+        
+        if not password:
+            raise ValueError("The given password must be set")
+        
+        if not first_name:
+            raise ValueError("The given first name must be set")
+        
+        if not last_name:
+            raise ValueError("The given last name must be set")
+        
+        if not role:
+            raise ValueError("The given role must be set")
+        
+        email = self.normalize_email(email)
+        user = self.model(username = username, email = email, first_name = first_name, last_name = last_name, role = role, **extra_fields)
+        user.set_password(password)
+        user.save(using = self._db)
+        return user
+    
+    def create_superuser(self, username = None, email = None, password = None, first_name = None, last_name = None,**extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('role', User.RoleChoices.admin)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff = True')
+        
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser = True')
+        
+        if extra_fields.get('role') != User.RoleChoices.admin:
+            raise ValueError('Superuser must have role = admin')
+        
+        return self.create_user(username, email, password, first_name, last_name, **extra_fields)
+
 
 
 class User(AbstractUser):
@@ -55,6 +99,8 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'password']
 
+    objects = UserManager()
+
     # This Propertry Made By A.Abo-ElMagd to use it in serialiers
     @property
     def name(self):
@@ -81,8 +127,9 @@ class User(AbstractUser):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
-
+        return f"{self.username}"
+    
+    
 
 class Project(models.Model):
     class StatusChoices(models.TextChoices):

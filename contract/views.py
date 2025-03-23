@@ -23,7 +23,7 @@ def create_contract(request):
     if creator.role != 'client' or assined.role != 'freelancer':
         return Response({'message': 'The creator must bea client and the assined must be a freelancer'}, status=status.HTTP_400_BAD_REQUEST)
     
-    serializer=ContractSerializer(data=request.data)
+    serializer=ContractSerializer(data=request.data, context={'request': request})
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -36,12 +36,35 @@ def create_contract(request):
 
 @api_view(['GET'])
 def get_user_contracts(request, user_id):
-    user=User.objects.get(id=user_id)
-    contracts=Contract.objects.filter(client=user) | Contract.objects.filter(freelancer=user)
+    if not user_id:
+        return Response({'message': 'User ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.user.id != user.id and request.user.role != 'admin':
+        return Response({'message': 'You are not authorized to view these contracts'}, 
+                        status=status.HTTP_403_FORBIDDEN)
 
-    serializer=ContractSerializer(contracts, many=True)
+    contracts = Contract.objects.filter(client=user) | Contract.objects.filter(freelancer=user)
+    
+    serializer = ContractSerializer(contracts, many=True, context={'request': request})
     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@api_view(['GET'])
+def get_contract(request, contract_id):
+    if not contract_id:
+        return Response({'message': 'Contract ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+    contract = get_object_or_404(Contract, id=contract_id)
+    serializer = ContractSerializer(contract, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
 
 
 @api_view(['PATCH'])
@@ -65,7 +88,7 @@ def update_contract(request, contract_id):
         if not request_fields.issubset(allowed_fields):
             return Response({'message': 'Freelancers can only update contract_state'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ContractSerializer(contract, data=request.data, partial=True)
+        serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
 
     # CLIENT: Can update anything EXCEPT 'contract_state'
     elif contract.client == request.user:
@@ -73,7 +96,7 @@ def update_contract(request, contract_id):
         if 'contract_state' in request.data:
             return Response({'message': 'Clients are not allowed to update contract_state'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ContractSerializer(contract, data=request.data, partial=True)
+        serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
 
     else:
         return Response({'message': 'You are not authorized to update this contract'}, status=status.HTTP_403_FORBIDDEN)

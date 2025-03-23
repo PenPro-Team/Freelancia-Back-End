@@ -21,6 +21,9 @@ class ProjectSerializer(BaseProjectSerializer):
 
 
 class UserSerializer(BaseUserSerializer):
+    image = serializers.SerializerMethodField()
+    def get_image(self, obj):
+       return super().get_image(obj)
     class Meta:
         model = User
         fields = ('id', 'first_name', 'last_name','image')

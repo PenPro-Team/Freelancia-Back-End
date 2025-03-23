@@ -9,13 +9,19 @@ class ReviewsModelTest(TestCase):
         self.reviewer = User.objects.create_user(
             username='ahmed', 
             password='password1',
-            email='ahmed@example.com'  
+            email='ahmed@example.com' ,
+            first_name='ahmed',
+            last_name='hamdy',
+            role=User.RoleChoices.freelancer 
         )
         
         self.reviewed = User.objects.create_user(
             username='mohamed', 
             password='password2',
-            email='mohamed@example.com' 
+            email='mohamed@example.com',
+            first_name='mohamed',
+            last_name='hamdy' ,
+            role=User.RoleChoices.client
         )
         
         self.project = Project.objects.create(
@@ -48,12 +54,19 @@ class ViewsTest(TestCase):
         self.reviewer = User.objects.create_user(
             username='ahmed', 
             password='password1',
-            email='ahmed@example.com'  
+            email='ahmed@example.com',
+            first_name='ahmed',
+            last_name='hamdy',
+            role=User.RoleChoices.freelancer 
+              
         )
         self.reviewed = User.objects.create_user(
             username='mohamed', 
             password='password2',
-            email='mohamed@example.com' 
+            email='mohamed@example.com', 
+            first_name='mohamed',
+            last_name='hamdy' ,
+            role=User.RoleChoices.client
         )
         
         self.project = Project.objects.create(

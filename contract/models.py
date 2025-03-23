@@ -10,6 +10,8 @@ class Contract(models.Model):
         pending = 'pending'
         aproved = 'aproved'
         canceled = 'canceled'
+        finished = 'finished'
+        hold='hold'
     contract_terms = models.TextField()
     dedline=models.PositiveIntegerField( default=0)
     budget=models.PositiveIntegerField( default=0)

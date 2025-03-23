@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'rest_framework',
     'rest_framework_simplejwt',
     'django.contrib.admin',
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'portfolio',
     'payments',
     'rest_framework.authtoken',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -87,7 +89,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'freelancia.wsgi.application'
-
+ASGI_APPLICATION = 'freelancia.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

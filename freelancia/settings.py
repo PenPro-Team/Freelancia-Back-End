@@ -187,8 +187,31 @@ EMAIL_HOST_PASSWORD = 'PenPro55555'
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'freelancia-team@freelancia.site'
 
+"""
+# Channels work in Memmory , Use it for test (windows if the redis not Dockerize)
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
+    },
+}
+"""
+"""
+Notes by Abd-Allah Abo-ElMagd:
+    Redis Server will be used for Channels , 
+    Need to Docerize Redis before deploy , 
+    Will Not Work in Windows without Docker
+    In linux install redis firs
+        sudo apt-get install redis
+    expiry value in seconds , it will delete the messages from hard after 1 hour if its value is 3600
+    hosts takes the redis-server host and port
+"""
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+            "expiry": 3600,
+        },
     },
 }

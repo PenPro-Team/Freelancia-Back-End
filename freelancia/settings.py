@@ -75,7 +75,7 @@ ROOT_URLCONF = 'freelancia.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # added by mustafa for email templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -178,3 +178,13 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+#  added by mustafa
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.privateemail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'freelancia-team@freelancia.site'
+EMAIL_HOST_PASSWORD = 'PenPro55555'
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'freelancia-team@freelancia.site'
+

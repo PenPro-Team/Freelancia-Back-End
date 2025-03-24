@@ -1,0 +1,8 @@
+Dear {{ recipient_name }},
+
+{{ message_body }}
+
+Best regards,
+The Freelancia Team
+
+© {{ current_year }} Freelancia. All rights reserved.

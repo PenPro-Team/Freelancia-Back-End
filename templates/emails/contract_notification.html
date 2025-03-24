@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>{{ subject }}</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      background-color: #ffffff;
+      width: 600px;
+      margin: 30px auto;
+      padding: 20px;
+      border: 1px solid #e8e8e8;
+    }
+    .header {
+      border-bottom: 1px solid #e8e8e8;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      color: #333333;
+      font-size: 24px;
+    }
+    .content {
+      font-size: 16px;
+      line-height: 1.5;
+      color: #555555;
+    }
+    .footer {
+      border-top: 1px solid #e8e8e8;
+      padding-top: 10px;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #999999;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>{{ subject }}</h1>
+    </div>
+    <div class="content">
+      <p>Dear {{ recipient_name }},</p>
+      <p>{{ message_body }}</p>
+      <p>Best regards,</p>
+      <p>The Freelancia Team</p>
+    </div>
+    <div class="footer">
+      <p>&copy; {{ current_year }} Freelancia. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

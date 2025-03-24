@@ -1,15 +1,15 @@
 from django.db import models
-from freelancia_back_end.models import User
+from django.conf import settings
 
 # Create your models here.
 class ChatRoom(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255)
-    description = models.TextField(blank=True , null=True)
+    description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    participants = models.ManyToManyField(User, related_name='chat_rooms')
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='chat_rooms')
     is_active = models.BooleanField(default=True)
     is_deleted = models.BooleanField(default=False)
     
@@ -19,9 +19,8 @@ class ChatRoom(models.Model):
 
 class Message(models.Model):
     id = models.AutoField(primary_key=True)
-    chat_room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    chat_room = models.ForeignKey('ChatRoom', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    

@@ -19,24 +19,33 @@ class PaymentMethod(models.Model):
     
 
 class Transaction(models.Model):
-    STATUS_CHOICES = (
+    STATE_CHOICES = (
         ('pending', 'Pending'),
         ('processing', 'Processing'),
         ('completed', 'Completed'),
         ('failed', 'Failed'),
+        ('compliance_failed', 'Compliance Failed'),
         ('canceled', 'Canceled'),
     )
 
     id = models.AutoField(primary_key=True)
-    contract_client = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='client_transactions')
-    contract_freelancer = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='freelancer_transactions')
-    contract_project = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='project_transactions')
-    contract_budget = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='budget_transactions')
+    contract_client = models.ForeignKey(Contract, null=True, blank=True, on_delete=models.CASCADE, related_name='client_transactions')
+    contract_freelancer = models.ForeignKey(Contract, null=True, blank=True, on_delete=models.CASCADE, related_name='freelancer_transactions')
+    contract_project = models.ForeignKey(Contract, null=True, blank=True, on_delete=models.CASCADE, related_name='project_transactions')
+    contract_budget = models.ForeignKey(Contract, null=True, blank=True, on_delete=models.CASCADE, related_name='budget_transactions')
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    state = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending')
+    state = models.CharField(max_length=20, choices=STATE_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(
+        'freelancia_back_end.User',
+        on_delete=models.CASCADE,
+        related_name='transactions'
+    )
+    payment_id = models.CharField(max_length=100, null=True, blank=True)
+    currency = models.CharField(max_length=3, default='USD')
+    error_message = models.TextField(null=True, blank=True)
 
     @property
     def client_vat_amount(self):
@@ -86,5 +95,20 @@ class Transaction(models.Model):
                 self.save()
                 raise e
 
+    def get_default_payment_method():
+        return PaymentMethod.objects.get_or_create(
+            method_name='PayPal',
+            defaults={
+                'client_vat': 0,
+                'freelancer_vat': 0,
+                'is_active': True
+            }
+        )[0].id
+
+    payment_method = models.ForeignKey(
+        PaymentMethod,
+        on_delete=models.CASCADE,
+        default=get_default_payment_method
+    )
     def __str__(self):
         return f"Transaction {self.id} - {self.payment_method.method_name}"

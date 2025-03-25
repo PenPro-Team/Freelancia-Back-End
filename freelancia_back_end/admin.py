@@ -9,13 +9,14 @@ from .models import Certificate
 
 class CustomUserAdmin(UserAdmin):
     list_display = ('id', 'username', 'email', 'role', 'first_name',
-                    'last_name', 'is_staff', 'is_superuser', 'speciality')
+                    'last_name', 'is_staff', 'is_superuser', 'speciality','user_balance')
     search_fields = ('id', 'username', 'email', 'first_name', 'last_name')
     ordering = ('id',)
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password')}),
         ('Personal info', {'fields': ('first_name', 'last_name', 'phone',
          'image', 'birth_date', 'postal_code', 'address', 'speciality', 'skills')}),
+        ('Balance Details', {'fields': ('user_balance',)}),
         ('Permissions', {'fields': ('role', 'rate', 'is_active', 'is_staff',
          'is_superuser', 'groups', 'user_permissions')}),
     )

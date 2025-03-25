@@ -20,6 +20,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from .permissions import IsOwnerOrAdminOrReadOnly
 from django.db import IntegrityError
 from rest_framework.exceptions import PermissionDenied
+from django.urls import reverse
 
 
 class ProjectSearchFilterView(ListAPIView):
@@ -117,7 +118,8 @@ def userView(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     # POST
     elif request.method == 'POST':
-        serializer = UserSerializer(data=request.data , context={'request': request})
+        serializer = UserSerializer(
+            data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -138,7 +140,8 @@ def userDetailView(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
-        serializer = UserSerializer(user, data=request.data , context={'request': request})
+        serializer = UserSerializer(
+            user, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -161,10 +164,11 @@ def userDetailView(request, pk):
                 user.image.delete()
                 user.image = None
                 user.save()
-        serializer = UserSerializer(user, data=request.data, partial=True , context={'request': request})
+        serializer = UserSerializer(
+            user, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
-            
+
             print(serializer.data["image"])
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
@@ -558,3 +562,19 @@ class CertificateViewSet(viewsets.ModelViewSet):
             )
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+# ------------------------------------------------------------------------
+# Display all Urls in list of Json
+
+
+@api_view(['GET'])
+def api_root(request, format=None):
+
+    return Response({
+        "certificates": request.build_absolute_uri(reverse('certificate-list')),
+        "users": request.build_absolute_uri(reverse('userView')),
+        "projects": request.build_absolute_uri(reverse('project_list')),
+        "proposals": request.build_absolute_uri(reverse('proposal_list')),
+        "skills": request.build_absolute_uri(reverse('skill_list')),
+        "speciality": request.build_absolute_uri(reverse('speciality_list')),
+    })

@@ -19,7 +19,7 @@ class ChatRoom(models.Model):
 
 class Message(models.Model):
     id = models.AutoField(primary_key=True)
-    chat_room = models.ForeignKey('ChatRoom', on_delete=models.CASCADE)
+    chat_room = models.ForeignKey('ChatRoom', on_delete=models.CASCADE, related_name='messages')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     message = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)

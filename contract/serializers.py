@@ -64,4 +64,26 @@ class ContractSerializer(serializers.ModelSerializer):
             'client_details',
             'project_details',
         )
+
+    def create(self,valedated_data):
+        contract= super().create(valedated_data)
+
+        project= contract.project
+        project.project_state=project.StatusChoices.ongoing 
+        project.save()
+        return contract
+    
+    def update(self,instance,valedated_data):
+        previous_state=instance.contract_state
+        contract= super().update(instance,valedated_data)
+        new_state=contract.contract_state
+
+        if previous_state != new_state:
+            project= contract.project
+            if new_state=='canceled':
+                project.project_state=project.StatusChoices.contract_canceled_and_reopened
+            elif new_state=='finished':
+                project.project_state=project.StatusChoices.finished
+            project.save()
+        return contract
         

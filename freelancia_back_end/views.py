@@ -212,7 +212,8 @@ class CustomAuthToken(TokenObtainPairView):
                 'role': user.role,
                 'name': user.name,
                 'rate': user.rate,
-                'image': image
+                'image': image,
+                'user_balance': user.user_balance,
             })
 
         return response

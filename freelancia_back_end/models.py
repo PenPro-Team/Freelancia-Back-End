@@ -76,6 +76,8 @@ class User(AbstractUser):
     postal_code = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     skills = models.ManyToManyField(Skill, related_name="users")
+    user_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+
 
     # certificate = models.ManyToManyField(
     #     Certificate, on_delete=models.CASCADE, related_name='certificates')

@@ -101,6 +101,9 @@ DATABASES = {
     }
 }
 
+PAYPAL_CLIENT_ID = 'AWXLHM_HOQ6-DiakQ9MAvw7yCi_AOzfTuFjFmbHPVAOMVoZf7s9h8ExKTeqhIKzU0elb4KY7lzuvhpW5'
+PAYPAL_SECRET = 'EAFWBvxhk6XRyGy5nQN-S72dhbMVhq4DjkWXc_Qfa3i0Uuk9jJvAKSwNp3g18zPvFMkVbBKV8fAW4bHJ'
+PAYPAL_MODE = 'sandbox' 
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

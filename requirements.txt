@@ -46,6 +46,7 @@ nbformat==5.10.4
 packaging==24.2
 pandocfilters==1.5.1
 parso==0.8.4
+paypalrestsdk==1.13.3
 pexpect==4.9.0
 pickleshare==0.7.5
 pillow==11.1.0

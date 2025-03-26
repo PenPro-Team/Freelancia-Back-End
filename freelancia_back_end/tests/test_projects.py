@@ -15,7 +15,6 @@ class ProjectModelTest(TestCase):
             role=User.RoleChoices.client
         )
         
-        # تعديل اسم الحقل ليتوافق مع نموذج Skill
         self.skill1 = Skill.objects.create(skill='Python')
         self.skill2 = Skill.objects.create(skill='Django')
 

@@ -129,7 +129,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             
             return list(Message.objects.filter(chat_room=chat_room)
                             .select_related('user')
-                            .order_by('created_at')[:limit])
+                            .order_by('-created_at')[:limit][::-1])
         except ChatRoom.DoesNotExist:
             logger.info("The Chat is Empty")
             return []

@@ -5,12 +5,20 @@ from chat.models import Message
 
 
 class ChatRoomSerializer(serializers.ModelSerializer):
-    # owner = UserSerializer()
-    # participants = UserSerializer()
+    owner = serializers.SerializerMethodField()
+    participants = serializers.SerializerMethodField()
 
     class Meta:
         model = ChatRoom
         fields = '__all__'
+
+    def get_owner(self, obj):
+        request = self.context.get('request')
+        return UserSerializer(obj.owner, context={'request': request}).data if request else UserSerializer(obj.owner).data
+
+    def get_participants(self, obj):
+        request = self.context.get('request')
+        return UserSerializer(obj.participants.all(), many=True, context={'request': request}).data if request else UserSerializer(obj.participants.all(), many=True).data
 
 
 class MessageSerializer(serializers.ModelSerializer):

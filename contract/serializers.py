@@ -1,10 +1,29 @@
 from rest_framework import serializers
-from .models import Contract
+from .models import Contract, Attachment
 from freelancia_back_end.models import User, Project
 from freelancia_back_end.serializers import UserSerializer as BaseUserSerializer
 from freelancia_back_end.serializers import ProjectSerializer as BaseProjectSerializer
+from urllib.parse import urljoin
+from django.conf import settings
 
 
+
+class AttachmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Attachment
+        fields = []
+    def to_representation(self, instance):
+        if instance.file:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(instance.file.url)
+            else:
+                return urljoin(settings.MEDIA_URL, str(instance.file))
+        return None
+
+   
+    
 
 class ProjectSerializer(BaseProjectSerializer):
     class Meta:
@@ -30,6 +49,7 @@ class UserSerializer(BaseUserSerializer):
 
 
 class ContractSerializer(serializers.ModelSerializer):
+    attachments = AttachmentSerializer(many=True)
     freelancer_details=UserSerializer(source='freelancer' ,read_only=True)
     client_details=UserSerializer(source='client' ,read_only=True)
     project_details = ProjectSerializer(source='project', read_only=True)
@@ -57,7 +77,8 @@ class ContractSerializer(serializers.ModelSerializer):
             'client',
             'project',
             'created_at',
-            'contract_state',
+            'contract_state',   
+            'attachments',
         )
         read_only_fields = (
             'freelancer_details',

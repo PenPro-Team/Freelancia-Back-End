@@ -28,3 +28,12 @@ class Contract(models.Model):
 
     def __str__(self):
         return f'{self.client} contract with {self.freelancer} to do {self.project}'
+
+
+class Attachment(models.Model):
+    file = models.FileField()
+    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='attachments')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Attachment for {self.contract}'

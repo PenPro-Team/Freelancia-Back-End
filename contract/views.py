@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .models import Contract
-from .serializers import ContractSerializer
+from rest_framework.decorators import api_view, parser_classes
+from .models import Attachment, Contract
+from .serializers import AttachmentSerializer, ContractSerializer
 from freelancia_back_end.models import User, Project
 from .notifications import send_contract_notification  # Import the function from notifications.py (email notifications)
+from rest_framework.parsers import MultiPartParser, FormParser
 
 @api_view(['POST'])
 def create_contract(request):
@@ -81,7 +82,7 @@ def update_contract(request, contract_id):
         serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
     # CLIENT: Can update anything EXCEPT 'contract_state'
     elif contract.client == request.user:
-        if 'contract_state' in request.data:
+        if 'contract_state' in request.data and request.data['contract_state'] != 'finished':
             return Response({'message': 'Clients are not allowed to update contract_state'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
     else:
@@ -102,3 +103,28 @@ def delete_contract(request, contract_id):
     contract = get_object_or_404(Contract, id=contract_id)
     contract.delete()
     return Response({'message': 'Contract deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])  
+def upload_attachment(request, contract_id):
+    contract = get_object_or_404(Contract, id=contract_id)
+    if request.user != contract.freelancer:
+        return Response({'message': 'You are not authorized to upload attachments for this contract'}, status=status.HTTP_403_FORBIDDEN)
+
+    files = request.FILES.getlist('files')
+    if not files:
+        return Response({'message': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    uploaded_files = []
+    for file in files:
+        # if file.name.split('.')[-1] not in ['pdf', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'py','']:
+        #     return Response({'message': f'File {file.name} is not a valid file type'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        
+        if file.size > 10 * 1024 * 1024: 
+            return Response({'message': f'File {file.name} is too large'},  status=status.HTTP_400_BAD_REQUEST)
+        
+        attachment = Attachment.objects.create(file=file, contract=contract)
+        uploaded_files.append(attachment)
+    serializer = AttachmentSerializer(uploaded_files, context={'request': request}, many=True)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)

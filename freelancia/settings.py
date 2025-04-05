@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'payments',
     'rest_framework.authtoken',
     'chat',
+    'report',
 ]
 
 MIDDLEWARE = [
@@ -75,7 +76,8 @@ ROOT_URLCONF = 'freelancia.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # added by mustafa for email templates
+        # added by mustafa for email templates
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -103,7 +105,7 @@ DATABASES = {
 
 PAYPAL_CLIENT_ID = 'AWXLHM_HOQ6-DiakQ9MAvw7yCi_AOzfTuFjFmbHPVAOMVoZf7s9h8ExKTeqhIKzU0elb4KY7lzuvhpW5'
 PAYPAL_SECRET = 'EAFWBvxhk6XRyGy5nQN-S72dhbMVhq4DjkWXc_Qfa3i0Uuk9jJvAKSwNp3g18zPvFMkVbBKV8fAW4bHJ'
-PAYPAL_MODE = 'sandbox' 
+PAYPAL_MODE = 'sandbox'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators

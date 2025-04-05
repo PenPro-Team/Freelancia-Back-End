@@ -9,8 +9,9 @@ from .models import Certificate
 
 class CustomUserAdmin(UserAdmin):
     list_display = ('id', 'username', 'email', 'role', 'first_name',
-                    'last_name', 'is_staff', 'is_superuser', 'speciality','user_balance')
-    search_fields = ('id', 'username', 'email', 'first_name', 'last_name')
+                    'last_name', 'is_active', 'is_staff', 'is_superuser', 'speciality', 'user_balance')
+    search_fields = ('id', 'username', 'email',
+                     'first_name', 'last_name', 'is_active')
     ordering = ('id',)
     fieldsets = (
         (None, {'fields': ('username', 'email', 'password')}),

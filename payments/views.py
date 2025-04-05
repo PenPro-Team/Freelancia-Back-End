@@ -1,13 +1,14 @@
 from django.urls import reverse
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated ,AllowAny
 from django.db import transaction
 from contract.models import Contract
 from freelancia import settings
-from .models import Transaction, PaymentMethod
-from .serializers import TransactionSerializer, PaymentMethodSerializer
+from .models import Transaction, PaymentMethod, Withdrawal
+from .serializers import TransactionSerializer, PaymentMethodSerializer, WithdrawalSerializer
 import paypalrestsdk
 from decimal import Decimal
 from rest_framework.views import APIView
@@ -276,3 +277,85 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
             'message': 'Available contracts for testing',
             'contracts': contracts_data
         })
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def create_withdrawal(request):
+    logger.info(f"Creating withdrawal request for user {request.user.username}")
+    
+    data = request.data.copy()
+    data['user'] = request.user.id
+    
+    with transaction.atomic():
+        serializer = WithdrawalSerializer(data=data)
+        if serializer.is_valid():
+            user = request.user
+            amount = Decimal(str(serializer.validated_data['amount']))
+            
+            if user.user_balance < amount:
+                return Response({
+                    'message': 'Insufficient balance',
+                    'required_amount': float(amount),
+                    'current_balance': float(user.user_balance)
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            user.user_balance -= amount
+            user.save()
+            
+            withdrawal = serializer.save()
+            logger.info(f"Withdrawal request created: {withdrawal.id}")
+            
+            response_data = serializer.data
+            response_data['new_balance'] = float(user.user_balance)
+            
+            return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+def update_withdrawal_status(request, withdrawal_id):
+    if request.user.role != 'admin':
+        return Response({'message': 'Only admins can update withdrawal status'}, 
+                      status=status.HTTP_403_FORBIDDEN)
+    
+    try:
+        with transaction.atomic():
+            withdrawal = get_object_or_404(Withdrawal, id=withdrawal_id)
+            new_status = request.data.get('status')
+            
+            if new_status not in [s[0] for s in Withdrawal.StatusChoices.choices]:
+                return Response({'message': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # If rejecting withdrawal, refund the amount
+            if new_status == Withdrawal.StatusChoices.REJECTED and withdrawal.status == Withdrawal.StatusChoices.PENDING:
+                user = withdrawal.user
+                user.user_balance += withdrawal.amount
+                user.save()
+                logger.info(f"Refunded {withdrawal.amount} to user {user.username}")
+            
+            withdrawal.status = new_status
+            withdrawal.notes = request.data.get('notes')
+            withdrawal.save()
+            
+            serializer = WithdrawalSerializer(withdrawal)
+            return Response(serializer.data)
+            
+    except Exception as e:
+        logger.error(f"Error updating withdrawal status: {str(e)}")
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_withdrawals(request):
+    if request.user.role == 'admin':
+        # Admin gets all withdrawals
+        withdrawals = Withdrawal.objects.all().order_by('-created_at')
+    else:
+        # Regular user gets only their withdrawals
+        withdrawals = Withdrawal.objects.filter(user=request.user).order_by('-created_at')
+    
+    serializer = WithdrawalSerializer(withdrawals, many=True)
+    return Response({
+        'count': withdrawals.count(),
+        'results': serializer.data
+    })

@@ -1,7 +1,9 @@
 import logging
+from urllib.parse import urljoin
 logger = logging.getLogger(__name__)
 
 from django.shortcuts import render, get_object_or_404
+from django.conf import settings
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, parser_classes
@@ -12,7 +14,9 @@ from .notifications import send_contract_notification  # Import the function fro
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
 from decimal import Decimal
-
+from django.utils import timezone
+import datetime
+    
 @api_view(['POST'])
 def create_contract(request):
     logger.info(f"Attempting to create contract with data: {request.data}")
@@ -108,8 +112,40 @@ def update_contract(request, contract_id):
     print(f"Contract Client: {contract.client}")
 
     # Block any updates if contract isn't in 'pending' state
-    if contract.contract_state != 'pending':
+    if contract.contract_state != contract.StatusChoices.pending and contract.contract_state !=  contract.StatusChoices.accepted:
         return Response({'message': 'You cannot update this contract'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    deadline_date= contract.created_at + datetime.timedelta(days=contract.deadline)
+    deadline_passed = timezone.now() > deadline_date
+
+    try:
+        with transaction.atomic():
+            serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
+            if serializer.is_valid():
+                new_state = request.data.get('contract_state')
+                budget_decimal = Decimal(str(contract.budget))  # Convert to Decimal safely
+                logger.info(f"New contract state: {new_state}")
+                if new_state == Contract.StatusChoices.completed:
+                    logger.info("Contract completed")
+                    # Transfer using Decimal
+                    freelancer = contract.freelancer
+                    freelancer.user_balance += budget_decimal
+                    freelancer.save()
+                elif new_state == Contract.StatusChoices.canceled:
+                    logger.info("Contract canceled")
+                    # Refund using Decimal
+                    client = contract.client
+                    client.user_balance += budget_decimal
+                    client.save()
+                    
+                contract = serializer.save()
+                send_contract_notification(contract, event=contract.contract_state)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({
+            'message': f'Error processing payment: {str(e)}'
+        }, status=status.HTTP_400_BAD_REQUEST)
 
     # FREELANCER: Can ONLY update 'contract_state'
     if contract.freelancer == request.user:
@@ -118,37 +154,27 @@ def update_contract(request, contract_id):
         if not request_fields.issubset(allowed_fields):
             return Response({'message': 'Freelancers can only update contract_state'}, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            with transaction.atomic():
-                serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
-                if serializer.is_valid():
-                    new_state = request.data.get('contract_state')
-                    budget_decimal = Decimal(str(contract.budget))  # Convert to Decimal safely
-                    
-                    if new_state == 'finished':
-                        # Transfer using Decimal
-                        freelancer = contract.freelancer
-                        freelancer.user_balance += budget_decimal
-                        freelancer.save()
-                    elif new_state == 'canceled':
-                        # Refund using Decimal
-                        client = contract.client
-                        client.user_balance += budget_decimal
-                        client.save()
-                        
-                    contract = serializer.save()
-                    send_contract_notification(contract, event=contract.contract_state)
-                    return Response(serializer.data, status=status.HTTP_200_OK)
-                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({
-                'message': f'Error processing payment: {str(e)}'
-            }, status=status.HTTP_400_BAD_REQUEST)
+        
 
     # CLIENT: Can update anything EXCEPT 'contract_state'
     elif contract.client == request.user:
-        if 'contract_state' in request.data and request.data['contract_state'] != 'finished':
-            return Response({'message': 'Clients are not allowed to update contract_state'}, status=status.HTTP_400_BAD_REQUEST)
+        if 'contract_state' in request.data:
+            new_state = request.data.get('contract_state')
+           
+            if new_state == 'canceled' and not deadline_passed:
+                return Response({
+                    'message': 'You can only cancel the contract after the deadline has passed',
+                    'deadline_date': deadline_date.isoformat(),
+                    'days_remaining': (deadline_date - timezone.now()).days
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            if new_state not in ['Completed', 'canceled']:
+                return Response({
+                    'message': 'Clients can only set contract state to Completed or canceled',
+                    'allowed_states': ['Completed', 'canceled']
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+
         serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
     else:
         return Response({'message': 'You are not authorized to update this contract'}, status=status.HTTP_403_FORBIDDEN)
@@ -177,10 +203,12 @@ def upload_attachment(request, contract_id):
         return Response({'message': 'You are not authorized to upload attachments for this contract'}, status=status.HTTP_403_FORBIDDEN)
 
     files = request.FILES.getlist('files')
-    if not files:
-        return Response({'message': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
+    description = request.data.get('description', '')
+    if not files and not description:
+        return Response({'message': 'Please provide at least one file or a description'}, status=status.HTTP_400_BAD_REQUEST)
     
     uploaded_files = []
+    file_urls = []
     for file in files:
         # if file.name.split('.')[-1] not in ['pdf', 'docx', 'txt', 'jpg', 'jpeg', 'png', 'py','']:
         #     return Response({'message': f'File {file.name} is not a valid file type'}, status=status.HTTP_400_BAD_REQUEST)
@@ -189,7 +217,29 @@ def upload_attachment(request, contract_id):
         if file.size > 10 * 1024 * 1024: 
             return Response({'message': f'File {file.name} is too large'},  status=status.HTTP_400_BAD_REQUEST)
         
-        attachment = Attachment.objects.create(file=file, contract=contract)
+        attachment = Attachment.objects.create(
+            file=file,
+              contract=contract,
+              
+              description=description)
         uploaded_files.append(attachment)
+        if attachment.file:
+            if request:
+                file_url = request.build_absolute_uri(attachment.file.url)
+            else:
+                file_url = urljoin(settings.MEDIA_URL, str(attachment.file))
+            file_urls.append(file_url)
+    if not files and description:
+        attachment = Attachment.objects.create(
+           
+            contract=contract,
+            description=description
+        )
+        uploaded_files.append(attachment)
+
+    response_data = {
+        'description': description,
+        'files': file_urls
+    }
     serializer = AttachmentSerializer(uploaded_files, context={'request': request}, many=True)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(response_data, status=status.HTTP_201_CREATED)

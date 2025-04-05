@@ -49,7 +49,7 @@ class UserSerializer(BaseUserSerializer):
 
 
 class ContractSerializer(serializers.ModelSerializer):
-    attachments = AttachmentSerializer(many=True)
+    attachments = serializers.SerializerMethodField(required=False)
     freelancer_details=UserSerializer(source='freelancer' ,read_only=True)
     client_details=UserSerializer(source='client' ,read_only=True)
     project_details = ProjectSerializer(source='project', read_only=True)
@@ -107,4 +107,7 @@ class ContractSerializer(serializers.ModelSerializer):
                 project.project_state=project.StatusChoices.finished
             project.save()
         return contract
-        
+
+    def get_attachments(self, obj):
+        attachments = obj.attachments.all()
+        return AttachmentSerializer(attachments, many=True).data

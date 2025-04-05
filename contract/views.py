@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 from django.shortcuts import render, get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
@@ -8,15 +11,18 @@ from freelancia_back_end.models import User, Project
 from .notifications import send_contract_notification  # Import the function from notifications.py (email notifications)
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.db import transaction
+from decimal import Decimal
 
 @api_view(['POST'])
 def create_contract(request):
+    logger.info(f"Attempting to create contract with data: {request.data}")
     client_id = request.data.get('client')
     freelancer_id = request.data.get('freelancer')
     project_id = request.data.get('project')
     budget = request.data.get('budget')
 
     if client_id is None or freelancer_id is None or project_id is None or budget is None:
+        logger.error(f"Missing required fields in contract creation: {request.data}")
         return Response({'message': 'Please provide all the required fields'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
@@ -24,40 +30,47 @@ def create_contract(request):
         assined = User.objects.get(id=freelancer_id)
 
         if creator.role != 'client' or assined.role != 'freelancer':
+            logger.error(f"Invalid roles: creator={creator.role}, assigned={assined.role}")
             return Response({'message': 'The creator must be a client and the assined must be a freelancer'}, 
                           status=status.HTTP_400_BAD_REQUEST)
         
-        # Check if client has sufficient balance
-        if creator.user_balance < float(budget):
+        budget_decimal = Decimal(str(budget))
+        logger.info(f"Checking balance for client {creator.username}: required={budget_decimal}, current={creator.user_balance}")
+        
+        if creator.user_balance < budget_decimal:
+            logger.warning(f"Insufficient funds for client {creator.username}")
             return Response({
                 'message': 'Insufficient funds! Please Deposit enough money to create a contract',
-                'required_amount': float(budget),
-                'current_balance': creator.user_balance
+                'required_amount': float(budget_decimal),
+                'current_balance': float(creator.user_balance)
             }, status=status.HTTP_400_BAD_REQUEST)
         
-        # Use transaction to ensure atomicity
         with transaction.atomic():
-            # Deduct the budget from client's balance
-            creator.user_balance -= float(budget)
+            creator.user_balance -= budget_decimal
             creator.save()
             
-            # Create the contract
             serializer = ContractSerializer(data=request.data, context={'request': request})
             if serializer.is_valid():
+                logger.info("Contract data validated successfully")
                 contract = serializer.save()
                 send_contract_notification(contract, event='created')
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
-                # If contract creation fails, transaction will rollback automatically
+                logger.error(f"Contract validation failed: {serializer.errors}")
                 return Response({
                     'message': 'Failed to create contract',
                     'errors': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
                 
-    except User.DoesNotExist:
+    except User.DoesNotExist as e:
+        logger.error(f"User not found error: {str(e)}")
         return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
-        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        logger.error(f"Unexpected error in contract creation: {str(e)}", exc_info=True)
+        return Response({
+            'message': 'Failed to create contract',
+            'error': str(e)
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -110,16 +123,17 @@ def update_contract(request, contract_id):
                 serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
                 if serializer.is_valid():
                     new_state = request.data.get('contract_state')
+                    budget_decimal = Decimal(str(contract.budget))  # Convert to Decimal safely
                     
                     if new_state == 'finished':
-                        # Transfer the budget to freelancer's balance
+                        # Transfer using Decimal
                         freelancer = contract.freelancer
-                        freelancer.user_balance += float(contract.budget)
+                        freelancer.user_balance += budget_decimal
                         freelancer.save()
                     elif new_state == 'canceled':
-                        # Refund the client
+                        # Refund using Decimal
                         client = contract.client
-                        client.user_balance += float(contract.budget)
+                        client.user_balance += budget_decimal
                         client.save()
                         
                     contract = serializer.save()

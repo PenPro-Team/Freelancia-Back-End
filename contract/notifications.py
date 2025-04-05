@@ -33,7 +33,7 @@ def send_contract_notification(contract, event):
         )
         recipient_info = [(contract.freelancer.email, contract.freelancer.first_name)]
     
-    elif event == 'aproved': # must be edited to approved later ... 
+    elif event == 'accepted': # must be edited to approved later ... 
         subject = "Contract Approved"
         message_body = (
             "Dear Client,\n\n"
@@ -53,7 +53,7 @@ def send_contract_notification(contract, event):
         )
         recipient_info = [(contract.freelancer.email, contract.freelancer.first_name)]
     
-    elif event == 'finished':
+    elif event == 'completed':
         subject = "Contract Completed Successfully"
         message_body = (
             "Dear {name},\n\n"

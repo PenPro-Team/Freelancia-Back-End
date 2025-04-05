@@ -531,21 +531,33 @@ class HighestRatedClientsView(APIView):
 # ------------------------------------------------------------------------
 
 class CertificateViewSet(viewsets.ModelViewSet):
-    # A ViewSet for managing certificates. Certificates are automatically associated with the logged-in user.
     serializer_class = CertificateSerializer
-    # Only authenticated users can access this endpoint
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Override get_permissions to allow different permissions per action:
+        - List and Retrieve: Allow anyone to view
+        - Create, Update, Delete: Require authentication
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        # Return only certificates associated with the logged-in user.
+        """
+        Return all certificates for list/retrieve,
+        but filter by user for other operations
+        """
+        if self.action in ['list', 'retrieve']:
+            return Certificate.objects.all()
         return Certificate.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-       # Automatically assign the logged in user to the certificate upon creation.
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
-        # Ensure the certificate being updated belongs to the loged in user
         instance = self.get_object()
         if instance.user != self.request.user:
             raise PermissionDenied(
@@ -553,7 +565,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
-        # Allow users to delete only their own certificates.
         instance = self.get_object()
         if instance.user != self.request.user:
             return Response(

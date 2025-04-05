@@ -7,32 +7,57 @@ from .serializers import AttachmentSerializer, ContractSerializer
 from freelancia_back_end.models import User, Project
 from .notifications import send_contract_notification  # Import the function from notifications.py (email notifications)
 from rest_framework.parsers import MultiPartParser, FormParser
+from django.db import transaction
 
 @api_view(['POST'])
 def create_contract(request):
     client_id = request.data.get('client')
     freelancer_id = request.data.get('freelancer')
-    project_id = request.data.get('project') 
+    project_id = request.data.get('project')
+    budget = request.data.get('budget')
 
-    if client_id is None or freelancer_id is None or project_id is None:
+    if client_id is None or freelancer_id is None or project_id is None or budget is None:
         return Response({'message': 'Please provide all the required fields'}, status=status.HTTP_400_BAD_REQUEST)
     
-    creator = User.objects.get(id=client_id)
-    assined = User.objects.get(id=freelancer_id)
+    try:
+        creator = User.objects.get(id=client_id)
+        assined = User.objects.get(id=freelancer_id)
 
-    if creator.role != 'client' or assined.role != 'freelancer':
-        return Response({'message': 'The creator must be a client and the assined must be a freelancer'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    serializer = ContractSerializer(data=request.data, context={'request': request})
-    if serializer.is_valid():
-        contract = serializer.save()
-        send_contract_notification(contract, event='created')  # Send notification email
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response({
-        'message': 'Failed to create contract',
-        'errors': serializer.errors
-    }, status=status.HTTP_400_BAD_REQUEST)
+        if creator.role != 'client' or assined.role != 'freelancer':
+            return Response({'message': 'The creator must be a client and the assined must be a freelancer'}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check if client has sufficient balance
+        if creator.user_balance < float(budget):
+            return Response({
+                'message': 'Insufficient funds! Please Deposit enough money to create a contract',
+                'required_amount': float(budget),
+                'current_balance': creator.user_balance
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Use transaction to ensure atomicity
+        with transaction.atomic():
+            # Deduct the budget from client's balance
+            creator.user_balance -= float(budget)
+            creator.save()
+            
+            # Create the contract
+            serializer = ContractSerializer(data=request.data, context={'request': request})
+            if serializer.is_valid():
+                contract = serializer.save()
+                send_contract_notification(contract, event='created')
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                # If contract creation fails, transaction will rollback automatically
+                return Response({
+                    'message': 'Failed to create contract',
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+    except User.DoesNotExist:
+        return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
@@ -79,7 +104,33 @@ def update_contract(request, contract_id):
         request_fields = set(request.data.keys())
         if not request_fields.issubset(allowed_fields):
             return Response({'message': 'Freelancers can only update contract_state'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
+        
+        try:
+            with transaction.atomic():
+                serializer = ContractSerializer(contract, data=request.data, partial=True, context={'request': request})
+                if serializer.is_valid():
+                    new_state = request.data.get('contract_state')
+                    
+                    if new_state == 'finished':
+                        # Transfer the budget to freelancer's balance
+                        freelancer = contract.freelancer
+                        freelancer.user_balance += float(contract.budget)
+                        freelancer.save()
+                    elif new_state == 'canceled':
+                        # Refund the client
+                        client = contract.client
+                        client.user_balance += float(contract.budget)
+                        client.save()
+                        
+                    contract = serializer.save()
+                    send_contract_notification(contract, event=contract.contract_state)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                'message': f'Error processing payment: {str(e)}'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
     # CLIENT: Can update anything EXCEPT 'contract_state'
     elif contract.client == request.user:
         if 'contract_state' in request.data and request.data['contract_state'] != 'finished':
@@ -90,7 +141,7 @@ def update_contract(request, contract_id):
 
     if serializer.is_valid():
         contract = serializer.save()
-        send_contract_notification(contract, event=contract.contract_state)  # Send notification email based on new state
+        send_contract_notification(contract, event=contract.contract_state)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

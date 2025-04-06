@@ -21,9 +21,12 @@ from .permissions import IsOwnerOrAdminOrReadOnly
 from django.db import IntegrityError
 from rest_framework.exceptions import PermissionDenied
 from django.urls import reverse
+from .pagination import BasePagination, PaginatedAPIView
 
 
 class ProjectSearchFilterView(ListAPIView):
+    pagination_class = BasePagination
+
     permission_classes = [AllowAny]
     serializer_class = ProjectSerializer
     queryset = Project.objects.all()
@@ -240,10 +243,14 @@ class UserDetailView(APIView):
 # ------------------------------------------------------------------------
 
 
-class ProposalViewAndCreate(APIView):
+class ProposalViewAndCreate(PaginatedAPIView):
+    permission_classes = [AllowAny]
+    serializer_class = ProposalSerializer
 
     def get_permissions(self):
-        return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
+        if self.request.method == 'GET':
+            return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
+        return [IsAuthenticated(), IsAdminUser()]
 
     def get(self, request):
         proposals = Proposal.objects.all()
@@ -257,22 +264,39 @@ class ProposalViewAndCreate(APIView):
         if project_id:
             project = get_object_or_404(Project, id=project_id)
             proposals = proposals.filter(project=project)
-        serializer = ProposalSerializer(
-            proposals, many=True, context={'request': request})
+
+        page = self.paginate_queryset(proposals)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(proposals, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        self.permission_classes = [IsAuthenticated, IsAdminUser]
+        serializer = self.get_serializer(data=request.data)
+        if request.data['project']:
+            project = get_object_or_404(Project, id=request.data['project'])
+        if serializer.is_valid():
+            try:
+                serializer.save(user=request.user, project=project)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            except IntegrityError:
+                return Response(
+                    {"error": "You have already submitted a proposal for this project."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request):
         serializer = ProposalSerializer(data=request.data)
         if request.data['project']:
             project = get_object_or_404(Project, id=request.data['project'])
         if serializer.is_valid():
             try:
-                # Save the proposal with the logged-in user and project
                 serializer.save(user=request.user, project=project)
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             except IntegrityError:
-                # Handle the case where a proposal already exists for this user and project
                 return Response(
                     {"error": "You have already submitted a proposal for this project."},
                     status=status.HTTP_400_BAD_REQUEST
@@ -325,10 +349,47 @@ def ProjectView(request):
     """
     View to list all projects.
     """
+    paginator = BasePagination()
     projects = Project.objects.all()
+    result_page = paginator.paginate_queryset(projects, request)
     serializer = ProjectSerializer(
-        projects, many=True, context={'request': request})
-    return Response(serializer.data)
+        result_page, many=True, context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
+
+# Project Views
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def ProjectsPerUser(request):
+    """
+    View to list projects for:
+    - Specific owner_id if provided in query params
+    - Request.user if authenticated and no owner_id provided
+    - All projects if neither owner_id nor authenticated user
+    """
+    paginator = BasePagination()
+    owner_id = request.query_params.get('owner_id')
+
+    if not owner_id and request.user.is_authenticated:
+        owner_id = request.user.id
+
+    if owner_id:
+        try:
+            owner_id = int(owner_id)
+            projects = Project.objects.filter(owner_id=owner_id)
+        except (ValueError, TypeError):
+            return Response(
+                {"error": "owner_id must be a valid integer"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    else:
+        projects = Project.objects.all()
+
+    result_page = paginator.paginate_queryset(projects, request)
+    serializer = ProjectSerializer(
+        result_page, many=True, context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
 
 
 class ProjectAPI(APIView):
@@ -531,21 +592,33 @@ class HighestRatedClientsView(APIView):
 # ------------------------------------------------------------------------
 
 class CertificateViewSet(viewsets.ModelViewSet):
-    # A ViewSet for managing certificates. Certificates are automatically associated with the logged-in user.
     serializer_class = CertificateSerializer
-    # Only authenticated users can access this endpoint
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """
+        Override get_permissions to allow different permissions per action:
+        - List and Retrieve: Allow anyone to view
+        - Create, Update, Delete: Require authentication
+        """
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        # Return only certificates associated with the logged-in user.
+        """
+        Return all certificates for list/retrieve,
+        but filter by user for other operations
+        """
+        if self.action in ['list', 'retrieve']:
+            return Certificate.objects.all()
         return Certificate.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-       # Automatically assign the logged in user to the certificate upon creation.
         serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
-        # Ensure the certificate being updated belongs to the loged in user
         instance = self.get_object()
         if instance.user != self.request.user:
             raise PermissionDenied(
@@ -553,7 +626,6 @@ class CertificateViewSet(viewsets.ModelViewSet):
         serializer.save()
 
     def destroy(self, request, *args, **kwargs):
-        # Allow users to delete only their own certificates.
         instance = self.get_object()
         if instance.user != self.request.user:
             return Response(

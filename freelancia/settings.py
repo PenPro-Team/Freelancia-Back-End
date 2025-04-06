@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'payments',
     'rest_framework.authtoken',
     'chat',
-    'chatbot'
+    'chatbot',
+    'report',
 ]
 
 MIDDLEWARE = [
@@ -76,7 +77,8 @@ ROOT_URLCONF = 'freelancia.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # added by mustafa for email templates
+        # added by mustafa for email templates
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -104,7 +106,7 @@ DATABASES = {
 
 PAYPAL_CLIENT_ID = 'AWXLHM_HOQ6-DiakQ9MAvw7yCi_AOzfTuFjFmbHPVAOMVoZf7s9h8ExKTeqhIKzU0elb4KY7lzuvhpW5'
 PAYPAL_SECRET = 'EAFWBvxhk6XRyGy5nQN-S72dhbMVhq4DjkWXc_Qfa3i0Uuk9jJvAKSwNp3g18zPvFMkVbBKV8fAW4bHJ'
-PAYPAL_MODE = 'sandbox' 
+PAYPAL_MODE = 'sandbox'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -166,6 +168,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'freelancia_back_end.permissions.IsOwnerOrAdminOrReadOnly',
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
 }
 
 SIMPLE_JWT = {
@@ -219,25 +223,3 @@ CHANNEL_LAYERS = {
         },
     },
 }
-
-
-
-# # Celery Configuration for chatbot
-
-
-
-# # --- Celery Configuration ---
-# CELERY_BROKER_URL = 'redis://localhost:6379/0'
-# CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-# CELERY_ACCEPT_CONTENT = ['json']
-# CELERY_TASK_SERIALIZER = 'json'
-# CELERY_RESULT_SERIALIZER = 'json'
-# CELERY_TIMEZONE = 'Africa/Cairo'
-
-# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
-# CELERY_BEAT_SCHEDULE = {
-#     'update-faiss-index-every-hour': { # اسم وصفي للمهمة المجدولة
-#         'task': 'chatbot.tasks.update_faiss_index_task', # المسار الكامل لدالة المهمة (سننشئها لاحقًا)
-#         'schedule': 3600.0, # كل ساعة (3600 ثانية)
-#     },
-# }

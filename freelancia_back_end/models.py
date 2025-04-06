@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission , BaseUserManager
+from django.contrib.auth.models import AbstractUser, Group, Permission, BaseUserManager
 
 
 class Skill(models.Model):
@@ -11,47 +11,47 @@ class Skill(models.Model):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, username = None, email = None, password = None, first_name = None, last_name = None, role  = None , **extra_fields):
+    def create_user(self, username=None, email=None, password=None, first_name=None, last_name=None, role=None, **extra_fields):
         if not username:
             raise ValueError("The given username must be set")
-        
+
         if not email:
             raise ValueError("The given email must be set")
-        
+
         if not password:
             raise ValueError("The given password must be set")
-        
+
         if not first_name:
             raise ValueError("The given first name must be set")
-        
+
         if not last_name:
             raise ValueError("The given last name must be set")
-        
+
         if not role:
             raise ValueError("The given role must be set")
-        
+
         email = self.normalize_email(email)
-        user = self.model(username = username, email = email, first_name = first_name, last_name = last_name, role = role, **extra_fields)
+        user = self.model(username=username, email=email, first_name=first_name,
+                          last_name=last_name, role=role, **extra_fields)
         user.set_password(password)
-        user.save(using = self._db)
+        user.save(using=self._db)
         return user
-    
-    def create_superuser(self, username = None, email = None, password = None, first_name = None, last_name = None,**extra_fields):
+
+    def create_superuser(self, username=None, email=None, password=None, first_name=None, last_name=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('role', User.RoleChoices.admin)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff = True')
-        
+
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser = True')
-        
+
         if extra_fields.get('role') != User.RoleChoices.admin:
             raise ValueError('Superuser must have role = admin')
-        
-        return self.create_user(username, email, password, first_name, last_name, **extra_fields)
 
+        return self.create_user(username, email, password, first_name, last_name, **extra_fields)
 
 
 class User(AbstractUser):
@@ -76,8 +76,8 @@ class User(AbstractUser):
     postal_code = models.CharField(max_length=255, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     skills = models.ManyToManyField(Skill, related_name="users")
-    user_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
-
+    user_balance = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.0)
 
     # certificate = models.ManyToManyField(
     #     Certificate, on_delete=models.CASCADE, related_name='certificates')
@@ -98,6 +98,8 @@ class User(AbstractUser):
         Group, related_name='freelancia_user_groups', blank=True)
     user_permissions = models.ManyToManyField(
         Permission, related_name='freelancia_user_permissions', blank=True)
+
+    is_active = models.BooleanField(default=True)
 
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'password']
 
@@ -130,8 +132,7 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.username}"
-    
-    
+
 
 class Project(models.Model):
     class StatusChoices(models.TextChoices):

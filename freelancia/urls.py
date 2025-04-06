@@ -38,7 +38,8 @@ urlpatterns = [
     # path('chatauth/' , include('chat.urls')),
     # path("api/auth/chat/", include('django_channels_jwt.urls')),
     path("auth_for_ws_connection/", AsgiValidateTokenView.as_view()),
-    path("chat/" , include('chat.urls'))
+    path("chat/" , include('chat.urls')),
+    path('chatbot/', include('chatbot.urls')),
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

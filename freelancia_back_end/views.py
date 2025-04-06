@@ -392,64 +392,107 @@ def ProjectsPerUser(request):
     return paginator.get_paginated_response(serializer.data)
 
 
+# (JJ) Modified this block
 class ProjectAPI(APIView):
-    """
-    API view to handle create, update (PUT/PATCH), and delete operations for Project.
-    """
     permission_classes = [AllowAny]
-    # Get One Project Detail
 
     def get(self, request, id):
-        self.permission_classes = [AllowAny]
         project = get_object_or_404(Project, id=id)
         serializer = ProjectSerializer(project, context={'request': request})
         return Response(serializer.data)
 
-    # Create a new project
-
     def post(self, request):
         self.permission_classes = [IsAuthenticated]
-        serializer = ProjectSerializer(data=request.data)
+        self.check_permissions(request)
+
+        serializer = ProjectSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
-            print(request.user)
             serializer.save(owner_id=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Full update of a project (replace the entire instance)
     def put(self, request, id):
+        self.permission_classes = [IsAuthenticated]
+        self.check_permissions(request)
+
         project = get_object_or_404(Project, pk=id)
-        # owner check
+
         if project.owner_id != request.user:
-            return Response({"error": "Not authorized"}, status=403)
-        serializer = ProjectSerializer(project, data=request.data)
+            return Response({"error": "Not authorized to modify this project."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        if project.project_state == Project.StatusChoices.ongoing:
+            return Response(
+                {"error": "Cannot modify a project that is ongoing."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        requested_state = request.data.get('project_state')
+        if requested_state:
+            if project.project_state == Project.StatusChoices.open and \
+               requested_state in [Project.StatusChoices.contract_canceled_and_reopened, Project.StatusChoices.finished]:
+                 return Response(
+                    {"error": f"Cannot change state directly from '{Project.StatusChoices.open}' to '{requested_state}'."},
+                    status=status.HTTP_400_BAD_REQUEST
+                 )
+
+        serializer = ProjectSerializer(project, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Partial update of a project (update only some fields)
     def patch(self, request, id):
+        self.permission_classes = [IsAuthenticated]
+        self.check_permissions(request)
+
         project = get_object_or_404(Project, pk=id)
-        # owner check
+
         if project.owner_id != request.user:
-            return Response({"error": "Not authorized"}, status=403)
+            return Response({"error": "Not authorized to modify this project."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        if project.project_state == Project.StatusChoices.ongoing:
+            return Response(
+                {"error": "Cannot modify a project that is ongoing."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        requested_state = request.data.get('project_state')
+        if requested_state:
+            if project.project_state == Project.StatusChoices.open and \
+               requested_state in [Project.StatusChoices.contract_canceled_and_reopened, Project.StatusChoices.finished]:
+                 return Response(
+                    {"error": f"Cannot change state directly from '{Project.StatusChoices.open}' to '{requested_state}'."},
+                    status=status.HTTP_400_BAD_REQUEST
+                 )
+
         serializer = ProjectSerializer(
-            project, data=request.data, partial=True)
+            project, data=request.data, partial=True, context={'request': request}
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Delete a project
     def delete(self, request, id):
+        self.permission_classes = [IsAuthenticated]
+        self.check_permissions(request)
+
         project = get_object_or_404(Project, pk=id)
-        # owner check
+
         if project.owner_id != request.user:
-            return Response({"error": "Not authorized"}, status=403)
+            return Response({"error": "Not authorized to delete this project."},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        if project.project_state == Project.StatusChoices.ongoing:
+            return Response(
+                {"error": "Cannot delete a project that is ongoing."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         project.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
 # Skill API views
 class SkillAPI(APIView):

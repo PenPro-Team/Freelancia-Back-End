@@ -356,6 +356,41 @@ def ProjectView(request):
         result_page, many=True, context={'request': request})
     return paginator.get_paginated_response(serializer.data)
 
+# Project Views
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def ProjectsPerUser(request):
+    """
+    View to list projects for:
+    - Specific owner_id if provided in query params
+    - Request.user if authenticated and no owner_id provided
+    - All projects if neither owner_id nor authenticated user
+    """
+    paginator = BasePagination()
+    owner_id = request.query_params.get('owner_id')
+
+    if not owner_id and request.user.is_authenticated:
+        owner_id = request.user.id
+
+    if owner_id:
+        try:
+            owner_id = int(owner_id)
+            projects = Project.objects.filter(owner_id=owner_id)
+        except (ValueError, TypeError):
+            return Response(
+                {"error": "owner_id must be a valid integer"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    else:
+        projects = Project.objects.all()
+
+    result_page = paginator.paginate_queryset(projects, request)
+    serializer = ProjectSerializer(
+        result_page, many=True, context={'request': request})
+    return paginator.get_paginated_response(serializer.data)
+
 
 class ProjectAPI(APIView):
     """

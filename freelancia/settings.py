@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'payments',
     'rest_framework.authtoken',
     'chat',
+    'chatbot',
     'report',
 ]
 

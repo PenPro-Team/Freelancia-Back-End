@@ -738,6 +738,30 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Projects per user",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}projects/user/?owner_id=2",
+							"host": [
+								"{{url}}projects"
+							],
+							"path": [
+								"user",
+								""
+							],
+							"query": [
+								{
+									"key": "owner_id",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

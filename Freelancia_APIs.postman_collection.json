@@ -1,10 +1,9 @@
 {
 	"info": {
-		"_postman_id": "22c70a31-7720-43d7-88aa-3c6322ee0a98",
+		"_postman_id": "6c89eb50-15ba-49b1-8d35-b2670469ca96",
 		"name": "Freelancia_APIs",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "42594537",
-		"_collection_link": "https://penpro-7660.postman.co/workspace/PenPro~a5c2064c-ac35-4303-8a46-bdf5d7166638/collection/42594537-22c70a31-7720-43d7-88aa-3c6322ee0a98?action=share&source=collection_link&creator=42594537"
+		"_exporter_id": "40668884"
 	},
 	"item": [
 		{
@@ -1149,343 +1148,256 @@
 			"name": "report",
 			"item": [
 				{
-					"name": "All Reports",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
-									"type": "string"
+					"name": "Report Users",
+					"item": [
+						{
+							"name": "All Reports",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}reports/users/",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"users",
+										""
+									]
 								}
-							]
+							},
+							"response": []
 						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}reports/users/",
-							"host": [
-								"{{url}}reports"
-							],
-							"path": [
-								"users",
-								""
-							]
+						{
+							"name": "Create a Report",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"user\": 2,\n  \"title\": \"Spam\",\n  \"description\": \"User sent spam messages repeatedly.\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}reports/users",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reprort Detail",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}reports/users/1",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"users",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Patch Report",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"ignored\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url}}reports/users/1/",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"users",
+										"1",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Report",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}reports/users/3",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"users",
+										"3"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
+					]
 				},
 				{
-					"name": "Create a Report",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
-									"type": "string"
+					"name": "Banned Users",
+					"item": [
+						{
+							"name": "All Banned Users",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url}}reports/banned-users/",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"banned-users",
+										""
+									]
 								}
-							]
+							},
+							"response": []
 						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"user\": 2,\n  \"title\": \"Spam\",\n  \"description\": \"User sent spam messages repeatedly.\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
+						{
+							"name": "Ban User",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{url}}reports/banned-users/3",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"banned-users",
+										"3"
+									]
 								}
-							}
+							},
+							"response": []
 						},
-						"url": {
-							"raw": "{{url}}reports/users",
-							"host": [
-								"{{url}}reports"
-							],
-							"path": [
-								"users"
-							]
+						{
+							"name": "UnBan User",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url}}reports/banned-users/3",
+									"host": [
+										"{{url}}reports"
+									],
+									"path": [
+										"banned-users",
+										"3"
+									]
+								}
+							},
+							"response": []
 						}
-					},
-					"response": []
-				},
-				{
-					"name": "Reprort Detail",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}reports/users/1",
-							"host": [
-								"{{url}}reports"
-							],
-							"path": [
-								"users",
-								"1"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Patch Report",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"status\": \"ignored\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}reports/users/1/",
-							"host": [
-								"{{url}}reports"
-							],
-							"path": [
-								"users",
-								"1",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Report",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTg3MzkxLCJpYXQiOjE3NDM4OTEzOTEsImp0aSI6IjhjYzRkODI5YTQ5NzQ3YzVhY2Q5ZmYwMDM1OTc2YTkwIiwidXNlcl9pZCI6MX0.WODMT69vReVg82TE7Tq8eV0dAk6ST0oOaBK4I2vaENM",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{url}}reports/users/3",
-							"host": [
-								"{{url}}reports"
-							],
-							"path": [
-								"users",
-								"3"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Payments",
-			"item": [
-				{
-					"name": "get withdrawals (admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTkxNDg0LCJpYXQiOjE3NDM4OTU0ODQsImp0aSI6ImM5ZjZhOWI2Y2VhYjRhMjA4NmM1ZjQzMjFmOTQ4NGRhIiwidXNlcl9pZCI6MX0.9JIP8yo5qgb4S5AggdhWwqr9XoVhmU93v7X7zeG3kSU",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}api/payments/withdrawals/",
-							"host": [
-								"{{url}}api"
-							],
-							"path": [
-								"payments",
-								"withdrawals",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "get withdrawals (user related)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTgxNDczLCJpYXQiOjE3NDM4ODU0NzMsImp0aSI6ImEwNzYyZDg4NWRjYjRiZjJhZDkxM2Y3M2ZlZmFkZTIyIiwidXNlcl9pZCI6Nn0.XIuBevv1FJdxJIaAVVzDTn7JGShUIthTOxq449nMdoE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{url}}api/payments/withdrawals/",
-							"host": [
-								"{{url}}api"
-							],
-							"path": [
-								"payments",
-								"withdrawals",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "update withdrawals (admin)",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTkxNDg0LCJpYXQiOjE3NDM4OTU0ODQsImp0aSI6ImM5ZjZhOWI2Y2VhYjRhMjA4NmM1ZjQzMjFmOTQ4NGRhIiwidXNlcl9pZCI6MX0.9JIP8yo5qgb4S5AggdhWwqr9XoVhmU93v7X7zeG3kSU",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"status\": \"approved\",  // or \"rejected\"\n    \"notes\": \"Optional notes about the decision\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}api/payments/withdrawals/3/status/",
-							"host": [
-								"{{url}}api"
-							],
-							"path": [
-								"payments",
-								"withdrawals",
-								"3",
-								"status",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "create withdrawal request",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTgxNDczLCJpYXQiOjE3NDM4ODU0NzMsImp0aSI6ImEwNzYyZDg4NWRjYjRiZjJhZDkxM2Y3M2ZlZmFkZTIyIiwidXNlcl9pZCI6Nn0.XIuBevv1FJdxJIaAVVzDTn7JGShUIthTOxq449nMdoE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"amount\": 100,\n    \"paypal_email\": \"your.email@example.com\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}api/payments/withdrawals/create/",
-							"host": [
-								"{{url}}api"
-							],
-							"path": [
-								"payments",
-								"withdrawals",
-								"create",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "paypal charge",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzQ1MTgxNDczLCJpYXQiOjE3NDM4ODU0NzMsImp0aSI6ImEwNzYyZDg4NWRjYjRiZjJhZDkxM2Y3M2ZlZmFkZTIyIiwidXNlcl9pZCI6Nn0.XIuBevv1FJdxJIaAVVzDTn7JGShUIthTOxq449nMdoE",
-									"type": "string"
-								}
-							]
-						},
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"amount\": \"100.00\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{url}}api/payments/paypal/charge/",
-							"host": [
-								"{{url}}api"
-							],
-							"path": [
-								"payments",
-								"paypal",
-								"charge",
-								""
-							]
-						}
-					},
-					"response": []
+					]
 				}
 			]
 		}

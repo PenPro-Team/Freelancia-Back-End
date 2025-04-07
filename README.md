@@ -2,6 +2,26 @@
 
 Freelancia is a platform connecting freelancers and clients, allowing for project posting, bidding, and management of freelance work.
 
+![GitHub stars](https://img.shields.io/github/stars/PenPro-Team/Freelancia-Back-End)
+![GitHub forks](https://img.shields.io/github/forks/PenPro-Team/Freelancia-Back-End)
+![GitHub issues](https://img.shields.io/github/issues/PenPro-Team/Freelancia-Back-End)
+![GitHub contributors](https://img.shields.io/github/contributors/PenPro-Team/Freelancia-Back-End)
+![GitHub license](https://img.shields.io/github/license/PenPro-Team/Freelancia-Back-End)
+
+Organization:
+
+- [PenPro-Team](https://github.com/PenPro-Team])
+
+
+Team Mempers:
+
+- [AbdAlla-AboElMagd](https://github.com/AbdAlla-AboElMagd)
+- [Ahmed Hamdy](https://github.com/AhmedHamdy85)
+- [Abdelrahman Teleb](https://github.com/jackiee211)
+- [Mohamed Hassan](https://github.com/Mo2024-cloud)
+- [mustafa Mohamed](https://github.com/mustafajuba98)
+
+
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
@@ -9,8 +29,6 @@ Freelancia is a platform connecting freelancers and clients, allowing for projec
 - [Project Structure](#project-structure)
 - [Project Statistics](#project-statistics)
 - [Technologies Used](#technologies-used)
-- [Contributors](#contributors)
-- [License](#license)
 - [Deployment](#deployment)
 - [Troubleshooting](#troubleshooting)
 
@@ -50,7 +68,8 @@ Freelancia is a platform connecting freelancers and clients, allowing for projec
 
 5. Run migrations:
    ```bash
-   python manage.py migrate
+   python manage.py migrate #To run synchronous (defoalt)
+   DJANGO_SETTINGS_MODULE=freelancia.settings daphne freelancia.asgi:application  #to run asynchronous {Chating using web socket}
    ```
 
 6. Start the development server:
@@ -259,7 +278,7 @@ Freelancia-Back-End/
 ### Development Metrics
 - **Development Start**: January 2023
 - **Last Major Update**: November 2023
-- **Contributors**: 5+
+- **Contributors**: 5
 - **GitHub Stars**: 120+
 
 ## Technologies Used
@@ -267,18 +286,10 @@ Freelancia-Back-End/
 - Django
 - Django REST Framework
 - PostgreSQL
-- Docker (optional for containerization)
-- Gunicorn (for production WSGI server)
-- Nginx (optional for reverse proxy)
-- Celery (optional for asynchronous tasks)
+- Daphne (for production WSGI server)
 - Redis (optional for task queue)
 
-## Contributors
-- [Your Name](https://github.com/yourusername)
-- [Contributor Name](https://github.com/contributorusername)
 
-## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ## Deployment
 To deploy the application:

@@ -61,7 +61,8 @@ def create_documents_from_db():
         projects = Project.objects.all()
         print(f"Found {projects.count()} projects.")
         for project in projects:
-            skills_str = ', '.join(skill.skill for skill in project.skills.all())
+            skills_str = ', '.join(
+                skill.skill for skill in project.skills.all())
             content = (
                 f"Project Name: {project.project_name}\n"
                 f"Description: {project.project_description}\n"
@@ -81,7 +82,8 @@ def create_documents_from_db():
                 f"Portfolio Title: {portfolio.title}\n"
                 f"Description: {portfolio.description}"
             )
-            user_id = portfolio.user.id if hasattr(portfolio, 'user') and portfolio.user else None
+            user_id = portfolio.user.id if hasattr(
+                portfolio, 'user') and portfolio.user else None
             metadata = {
                 "source": "portfolio", "portfolio_id": portfolio.id, "portfolio_title": portfolio.title,
                 "user_id": user_id, "created_at": portfolio.created_at.isoformat() if portfolio.created_at else None,

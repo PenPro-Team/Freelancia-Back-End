@@ -4,10 +4,8 @@ import django
 from dotenv import load_dotenv
 
 load_dotenv()
-
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "freelancia.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "freelancia.settings") # Adjust if your settings module is different
 
 try:
     print("Initializing Django...")
@@ -15,45 +13,50 @@ try:
     print("Django initialized successfully.")
 except Exception as e:
     print(f"Error initializing Django: {e}")
-    print("Please ensure DJANGO_SETTINGS_MODULE is set correctly ('project_name.settings').")
-    print("Also, make sure you are running this script from within your project environment.")
     sys.exit(1)
 
+# --- Langchain and Project Model Imports ---
 try:
-    from freelancia_back_end.models import Project, Skill
+    from freelancia_back_end.models import Project, Skill # Adjust import path if needed
     from reviews.models import Review
     from portfolio.models import Portfolio
-    from langchain_openai import OpenAIEmbeddings
+    from langchain_community.embeddings import HuggingFaceEmbeddings
     from langchain_community.vectorstores import FAISS
     from langchain_core.documents import Document
+    print("Required libraries and models imported successfully.")
 except ImportError as e:
     print(f"Error importing libraries or models: {e}")
-    print("Ensure all requirements are installed: pip install django python-dotenv langchain langchain-openai langchain-community faiss-cpu (or faiss-gpu) openai")
+    print("Ensure required packages like langchain-community, faiss-cpu, sentence-transformers, torch, accelerate are installed.")
     sys.exit(1)
 except Exception as e:
     print(f"An unexpected error occurred during imports: {e}")
     sys.exit(1)
 
-
+# --- Constants ---
 VECTOR_STORE_PATH = "faiss_vector_store"
 
+# --- Initialize Local Embeddings Model ---
+print("Initializing LOCAL Embeddings model...")
+try:
+    model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    device_to_use = 'cpu'
+    model_kwargs = {'device': device_to_use}
+    encode_kwargs = {'normalize_embeddings': False}
+    embeddings = HuggingFaceEmbeddings(
+        model_name=model_name,
+        model_kwargs=model_kwargs,
+        encode_kwargs=encode_kwargs
+    )
+    print(f"Successfully initialized local embeddings model: '{model_name}' on device: '{device_to_use}'")
+except Exception as e:
+    print(f"ERROR initializing local Embeddings model: {e}")
+    print("Troubleshooting: Check installations (sentence-transformers, torch, accelerate), model name, internet (first run), resources.")
+    sys.exit(1)
 
-def get_openai_api_key():
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        print("Error: OPENAI_API_KEY environment variable not found.")
-        print("Ensure you have a .env file in the project root containing:")
-        print("OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-        sys.exit(1)
-    if not api_key.startswith("sk-"):
-        print("Warning: OPENAI_API_KEY does not seem to start with 'sk-'. Please verify it's a valid OpenAI key.")
-    return api_key
-
-
+# --- Function to Create Documents from Database ---
 def create_documents_from_db():
     documents = []
     print("Starting data fetching from database...")
-
     try:
         projects = Project.objects.all()
         print(f"Found {projects.count()} projects.")
@@ -67,9 +70,7 @@ def create_documents_from_db():
                 f"Status: {project.project_state}"
             )
             metadata = {
-                "source": "project",
-                "project_id": project.id,
-                "project_name": project.project_name,
+                "source": "project", "project_id": project.id, "project_name": project.project_name,
                 "created_at": project.created_at.isoformat() if project.created_at else None,
             }
             documents.append(Document(page_content=content, metadata=metadata))
@@ -84,11 +85,8 @@ def create_documents_from_db():
             user_id = portfolio.user.id if hasattr(
                 portfolio, 'user') and portfolio.user else None
             metadata = {
-                "source": "portfolio",
-                "portfolio_id": portfolio.id,
-                "portfolio_title": portfolio.title,
-                "user_id": user_id,
-                "created_at": portfolio.created_at.isoformat() if portfolio.created_at else None,
+                "source": "portfolio", "portfolio_id": portfolio.id, "portfolio_title": portfolio.title,
+                "user_id": user_id, "created_at": portfolio.created_at.isoformat() if portfolio.created_at else None,
             }
             documents.append(Document(page_content=content, metadata=metadata))
 
@@ -100,58 +98,39 @@ def create_documents_from_db():
                 f"Rating: {review.rate}"
             )
             metadata = {
-                "source": "review",
-                "review_id": review.id,
+                "source": "review", "review_id": review.id,
                 "created_at": review.created_at.isoformat() if review.created_at else None,
             }
             documents.append(Document(page_content=content, metadata=metadata))
 
         print(f"Total documents created: {len(documents)}")
         return documents
-
     except Exception as e:
         print(f"Error fetching data from database: {e}")
         sys.exit(1)
 
-
+# --- Function to Build and Save Local FAISS Index ---
 def build_and_save_index(documents, embeddings_model):
     if not documents:
         print("No documents provided to build the index. Exiting.")
         return
 
-    print(f"Starting FAISS index build for {len(documents)} documents...")
+    print(f"Starting FAISS index build for {len(documents)} documents using LOCAL embeddings...")
     try:
         vectorstore = FAISS.from_documents(documents, embeddings_model)
         vectorstore.save_local(VECTOR_STORE_PATH)
-        print(
-            f"FAISS index built and saved successfully to directory: '{VECTOR_STORE_PATH}'")
-
+        print(f"FAISS index built and saved successfully to directory: '{VECTOR_STORE_PATH}' using local embeddings.")
     except ImportError:
-        print("Error: FAISS library not found.")
-        print("Please install it using: pip install faiss-cpu  OR  pip install faiss-gpu")
+        print("Error: FAISS library not found. Install faiss-cpu or faiss-gpu.")
         sys.exit(1)
     except Exception as e:
-        print(f"An error occurred during FAISS index build or save: {e}")
-        print("Verify your internet connection and OpenAI API key validity/quota.")
-        print(
-            f"Ensure write permissions for the directory: '{VECTOR_STORE_PATH}'")
+        print(f"An error occurred during LOCAL FAISS index build or save: {e}")
+        print("Troubleshooting: Check permissions, disk space, system resources.")
         sys.exit(1)
 
-
+# --- Main Script Execution ---
 if __name__ == "__main__":
-    print("--- Starting Index Build Process ---")
-
-    openai_api_key = get_openai_api_key()
-
-    print("Initializing OpenAI Embeddings model...")
-    try:
-        embeddings = OpenAIEmbeddings(api_key=openai_api_key)
-    except Exception as e:
-        print(f"Error initializing OpenAIEmbeddings: {e}")
-        sys.exit(1)
-
+    print("\n--- Starting Index Build Process (Using Local Embeddings) ---")
     all_documents = create_documents_from_db()
-
     build_and_save_index(all_documents, embeddings)
-
-    print("--- Index Build Process Finished Successfully ---")
+    print("\n--- Index Build Process Finished Successfully (Using Local Embeddings) ---")

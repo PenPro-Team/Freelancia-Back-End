@@ -24,6 +24,41 @@ class SkillSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class PublicUserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            else:
+                return urljoin(settings.MEDIA_URL, str(obj.image))
+        return None
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "image"]
+
+
+class AdminPublicUserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    def get_image(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            else:
+                return urljoin(settings.MEDIA_URL, str(obj.image))
+        return None
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name",
+                  "last_name", "user_balance", "image"]
+
+
 class UserSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     name = serializers.SerializerMethodField()

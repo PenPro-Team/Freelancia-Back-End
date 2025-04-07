@@ -37,6 +37,7 @@ except Exception as e:
 
 VECTOR_STORE_PATH = "faiss_vector_store"
 
+
 def get_openai_api_key():
     api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
@@ -45,8 +46,9 @@ def get_openai_api_key():
         print("OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
         sys.exit(1)
     if not api_key.startswith("sk-"):
-         print("Warning: OPENAI_API_KEY does not seem to start with 'sk-'. Please verify it's a valid OpenAI key.")
+        print("Warning: OPENAI_API_KEY does not seem to start with 'sk-'. Please verify it's a valid OpenAI key.")
     return api_key
+
 
 def create_documents_from_db():
     documents = []
@@ -56,7 +58,8 @@ def create_documents_from_db():
         projects = Project.objects.all()
         print(f"Found {projects.count()} projects.")
         for project in projects:
-            skills_str = ', '.join(skill.skill for skill in project.skills.all())
+            skills_str = ', '.join(
+                skill.skill for skill in project.skills.all())
             content = (
                 f"Project Name: {project.project_name}\n"
                 f"Description: {project.project_description}\n"
@@ -78,7 +81,8 @@ def create_documents_from_db():
                 f"Portfolio Title: {portfolio.title}\n"
                 f"Description: {portfolio.description}"
             )
-            user_id = portfolio.user.id if hasattr(portfolio, 'user') and portfolio.user else None
+            user_id = portfolio.user.id if hasattr(
+                portfolio, 'user') and portfolio.user else None
             metadata = {
                 "source": "portfolio",
                 "portfolio_id": portfolio.id,
@@ -93,7 +97,7 @@ def create_documents_from_db():
         for review in reviews:
             content = (
                 f"Review Message: {review.message}\n"
-                f"Rating: {review.rating}"
+                f"Rating: {review.rate}"
             )
             metadata = {
                 "source": "review",
@@ -119,7 +123,8 @@ def build_and_save_index(documents, embeddings_model):
     try:
         vectorstore = FAISS.from_documents(documents, embeddings_model)
         vectorstore.save_local(VECTOR_STORE_PATH)
-        print(f"FAISS index built and saved successfully to directory: '{VECTOR_STORE_PATH}'")
+        print(
+            f"FAISS index built and saved successfully to directory: '{VECTOR_STORE_PATH}'")
 
     except ImportError:
         print("Error: FAISS library not found.")
@@ -128,8 +133,10 @@ def build_and_save_index(documents, embeddings_model):
     except Exception as e:
         print(f"An error occurred during FAISS index build or save: {e}")
         print("Verify your internet connection and OpenAI API key validity/quota.")
-        print(f"Ensure write permissions for the directory: '{VECTOR_STORE_PATH}'")
+        print(
+            f"Ensure write permissions for the directory: '{VECTOR_STORE_PATH}'")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     print("--- Starting Index Build Process ---")

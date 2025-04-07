@@ -68,7 +68,7 @@ Team Mempers:
 
 5. Run migrations:
    ```bash
-   python manage.py migrate #To run synchronous (defoalt)
+   python manage.py migrate #To run synchronous (default)
    DJANGO_SETTINGS_MODULE=freelancia.settings daphne freelancia.asgi:application  #to run asynchronous {Chating using web socket}
    ```
 

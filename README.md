@@ -79,74 +79,111 @@ Authorization: Bearer your_token_here
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/register/` - Register a new user
-- `POST /api/auth/login/` - Login and get JWT token
-- `POST /api/auth/token/refresh/` - Refresh JWT token
-- `POST /api/auth/token/verify/` - Verify JWT token
-- `POST /api/auth/password/reset/` - Request password reset
-- `POST /api/auth/password/reset/confirm/` - Confirm password reset
+- `POST /api/token/` - Obtain JWT token pair
+- `POST /api/token/refresh/` - Refresh JWT token
+- `POST /auth-token/` - Obtain custom authentication token
+- `POST /logout/` - Log out and invalidate token
+- `GET /auth_for_ws_connection/` - Validate token for WebSocket connections
 
 ### Users
-- `GET /api/users/` - List all users
-- `POST /api/users/` - Create a new user
-- `GET /api/users/{id}/` - Get user details
-- `PUT /api/users/{id}/` - Update user details
-- `PATCH /api/users/{id}/` - Partially update user details
-- `DELETE /api/users/{id}/` - Delete a user
-- `GET /api/users/me/` - Get current user profile
-- `PUT /api/users/me/` - Update current user profile
-- `GET /api/users/{id}/reviews/` - Get reviews for a user
-- `GET /api/users/{id}/projects/` - Get projects by a user
-- `GET /api/users/{id}/bids/` - Get bids by a user
+- `GET /users/` - List all users
+- `POST /users/` - Create a new user
+- `GET /users/<int:pk>/` - Get specific user details
+- `PUT /users/<int:pk>/` - Update user details
+- `GET /user/<int:pk>/` - Get detailed user profile
+- `GET /freelancers/highest-rated/` - Get list of highest-rated freelancers
+- `GET /clients/highest-rated/` - Get list of highest-rated clients
 
 ### Projects
-- `GET /api/projects/` - List all projects
-- `POST /api/projects/` - Create a new project
-- `GET /api/projects/{id}/` - Get project details
-- `PUT /api/projects/{id}/` - Update project details
-- `PATCH /api/projects/{id}/` - Partially update project details
-- `DELETE /api/projects/{id}/` - Delete a project
-- `GET /api/projects/categories/` - List all project categories
-- `GET /api/projects/featured/` - Get featured projects
-- `GET /api/projects/{id}/bids/` - Get bids for a project
-- `GET /api/projects/search/` - Search projects by keywords
-- `GET /api/projects/filter/` - Filter projects by criteria
-- `PUT /api/projects/{id}/award/` - Award project to a bid
+- `GET /projects/` - List all projects
+- `POST /projects/create/` - Create a new project
+- `GET /projects/<int:id>/` - Get project details
+- `PUT /projects/<int:id>/` - Update project details
+- `DELETE /projects/<int:id>/` - Delete a project
+- `GET /projects/search/` - Search and filter projects
+- `GET /projects/user/` - Get projects for the current user
+- `GET /speciality/` - List all project specialities
+- `GET /speciality/<int:id>/` - Get specific speciality details
 
-### Bids
-- `GET /api/bids/` - List all bids
-- `POST /api/bids/` - Create a new bid
-- `GET /api/bids/{id}/` - Get bid details
-- `PUT /api/bids/{id}/` - Update bid details
-- `PATCH /api/bids/{id}/` - Partially update bid details
-- `DELETE /api/bids/{id}/` - Delete a bid
-- `PUT /api/bids/{id}/accept/` - Accept a bid
-- `PUT /api/bids/{id}/reject/` - Reject a bid
+### Proposals (Bids)
+- `GET /proposals/` - List all proposals
+- `POST /proposals/` - Create a new proposal
+- `GET /proposals/<int:id>/` - Get proposal details
+- `PUT /proposals/<int:id>/` - Update proposal details
+- `DELETE /proposals/<int:id>/` - Delete a proposal
+- `GET /proposals/user/<int:id>/` - List proposals by user
+- `GET /proposals/project/<int:id>/` - List proposals for a project
 
 ### Reviews
-- `GET /api/reviews/` - List all reviews
-- `POST /api/reviews/` - Create a new review
-- `GET /api/reviews/{id}/` - Get review details
-- `PUT /api/reviews/{id}/` - Update review details
-- `PATCH /api/reviews/{id}/` - Partially update review details
-- `DELETE /api/reviews/{id}/` - Delete a review
+- `POST /reviews/create` - Create a new review
+- `GET /reviews/received/user/<int:user_id>` - Get reviews received by a user
+- `PUT /reviews/update/<int:review_id>` - Update a review
+- `DELETE /reviews/delete/<int:review_id>` - Delete a review
+- `GET /reviews/made/user/<int:user_id>` - Get reviews made by a user
+- `GET /reviews/project/<int:project_id>` - Get reviews for a project
+
+### Skills
+- `GET /skills/` - List all skills
+- `POST /skills/create/` - Create a new skill
+- `GET /skills/<int:id>/` - Get skill details
+- `PUT /skills/<int:id>/` - Update skill details
+- `DELETE /skills/<int:id>/` - Delete a skill
+
+### Portfolios
+- `GET /portfolios/` - List all portfolios
+- `POST /portfolios/` - Create a new portfolio
+- `GET /portfolios/<int:id>` - Get portfolio details
+- `PUT /portfolios/<int:id>` - Update portfolio details
+- `DELETE /portfolios/<int:id>` - Delete a portfolio
+
+### Certificates
+- `GET /certificates/` - List all certificates
+- `POST /certificates/` - Create a new certificate
+- `GET /certificates/<int:pk>/` - Get certificate details
+- `PUT /certificates/<int:pk>/` - Update certificate details
+- `DELETE /certificates/<int:pk>/` - Delete a certificate
+
+### Contracts
+- `POST /contract/create` - Create a new contract
+- `GET /contract/user/contracts/<int:user_id>` - Get contracts for a specific user
+- `PUT /contract/update/<int:contract_id>` - Update a contract
+- `GET /contract/get/<int:contract_id>` - Get contract details
+- `POST /contract/<int:contract_id>/attachments` - Upload attachment to a contract
 
 ### Payments
-- `POST /api/payments/create/` - Create a payment
-- `GET /api/payments/{id}/` - Get payment details
-- `GET /api/payments/history/` - Get payment history
-- `POST /api/payments/webhook/` - Payment webhook endpoint
+- `GET /payments/transactions/` - List all transactions
+- `POST /payments/transactions/` - Create a new transaction
+- `GET /payments/transactions/<int:pk>/` - Get transaction details
+- `PUT /payments/transactions/<int:pk>/` - Update transaction details
+- `GET /payments/payment-methods/` - List payment methods
+- `POST /payments/payment-methods/` - Add payment method
+- `GET /payments/payment-methods/<int:pk>/` - Get payment method details
+- `POST /payments/paypal/charge/` - Initiate PayPal charge
+- `GET /payments/paypal/success/` - PayPal success callback
+- `GET /payments/paypal/cancel/` - PayPal cancel callback
+- `POST /payments/withdrawals/create/` - Create withdrawal request
+- `PUT /payments/withdrawals/<int:withdrawal_id>/status/` - Update withdrawal status
+- `GET /payments/withdrawals/` - Get user's withdrawal requests
 
-### Notifications
-- `GET /api/notifications/` - List user notifications
-- `PUT /api/notifications/{id}/read/` - Mark notification as read
-- `PUT /api/notifications/read-all/` - Mark all notifications as read
+### Reports
+- `GET /reports/users/` - List user reports
+- `POST /reports/users/` - Create user report
+- `GET /reports/users/<int:report_id>/` - Get user report details
+- `PUT /reports/users/<int:report_id>/` - Update user report
+- `GET /reports/contracts/` - List contract reports
+- `POST /reports/contracts/` - Create contract report
+- `GET /reports/contracts/<int:report_id>/` - Get contract report details
+- `PUT /reports/contracts/<int:report_id>/` - Update contract report
+- `GET /reports/banned-users/` - List banned users
+- `POST /reports/banned-users/<int:user_id>/` - Ban/unban a user
 
-### Messages
-- `GET /api/messages/` - List user conversations
-- `GET /api/messages/{conversation_id}/` - Get messages in a conversation
-- `POST /api/messages/{recipient_id}/` - Send a message
-- `PUT /api/messages/{id}/read/` - Mark message as read
+### Chat
+- `GET /chat/userchatrooms/` - List user's chat rooms
+- `POST /chat/api/auth/` - Chat authentication
+
+### Chatbot
+- `POST /chatbot/ask/` - Ask a question to the chatbot
+- `POST /chatbot/feedback/` - Submit feedback for chatbot responses
 
 ## Project Structure
 The complete project structure is organized as follows:

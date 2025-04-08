@@ -98,10 +98,21 @@ ASGI_APPLICATION = 'freelancia.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "freelancia", # create the database in pgAdmin with the same name
+        "USER": "postgres", #you can keep the same user or create a new one
+        "PASSWORD": "123", # set your master postgres password or the password of the user you created
+        "HOST": "127.0.0.1",# Don't change it 
+        "PORT": "5432", # Don't change it 
     }
 }
 

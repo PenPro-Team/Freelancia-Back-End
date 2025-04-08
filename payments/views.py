@@ -95,56 +95,50 @@ class PayPalSuccessView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            user = User.objects.select_for_update().get(id=user_id)
+            # Find the payment first, outside the transaction
+            payment = paypalrestsdk.Payment.find(payment_id)
+            if not payment:
+                raise ValueError("Payment not found")
+                
+            payment_execution = payment.execute({"payer_id": payer_id})
+            print(payment_execution)
             
-            try:
-                # Find the payment first
-                payment = paypalrestsdk.Payment.find(payment_id)
-                if not payment:
-                    raise ValueError("Payment not found")
-                payment_execution = payment.execute({"payer_id": payer_id})
-                print(payment_execution)
-                # Execute the payment correctly
-                if payment_execution:
-                    logger.info(f"PayPal payment executed successfully for payment {payment_id}")
-                    amount = Decimal(payment.transactions[0].amount.total)
+            if payment_execution:
+                logger.info(f"PayPal payment executed successfully for payment {payment_id}")
+                amount = Decimal(payment.transactions[0].amount.total)
+                
+                with transaction.atomic():
+                    # Move select_for_update inside the transaction block
+                    user = User.objects.select_for_update().get(id=user_id)
                     
-                    with transaction.atomic():
-                        # Update user balance
-                        user.user_balance += amount
-                        user.save()
-                        
-                        logger.info(f"Balance updated successfully for user {user.username}")
-                        return Response({
-                            'status': 'success',
-                            'message': 'Payment successful and balance updated',
-                            'new_balance': user.user_balance
-                        })
-                else:
-                    error_msg = payment.error.get('message', 'Payment execution failed')
-                    logger.error(f"PayPal execution failed: {error_msg}")
+                    # Update user balance
+                    user.user_balance += amount
+                    user.save()
+                    
+                    logger.info(f"Balance updated successfully for user {user.username}")
                     return Response({
-                        'status': 'error',
-                        'message': error_msg
-                    }, status=status.HTTP_400_BAD_REQUEST)
-                    
-            except paypalrestsdk.exceptions.ResourceNotFound:
-                logger.error(f"Payment {payment_id} not found")
+                        'status': 'success',
+                        'message': 'Payment successful and balance updated',
+                        'new_balance': user.user_balance
+                    })
+            else:
+                error_msg = payment.error.get('message', 'Payment execution failed')
+                logger.error(f"PayPal execution failed: {error_msg}")
                 return Response({
                     'status': 'error',
-                    'message': 'Payment not found'
-                }, status=status.HTTP_404_NOT_FOUND)
-            except Exception as e:
-                logger.error(f"Payment execution error: {str(e)}")
-                return Response({
-                    'status': 'error',
-                    'message': str(e)
+                    'message': error_msg
                 }, status=status.HTTP_400_BAD_REQUEST)
-
+                
         except User.DoesNotExist:
             return Response({
                 'status': 'error',
                 'message': 'User not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except paypalrestsdk.exceptions.ResourceNotFound:
+            logger.error(f"Payment {payment_id} not found")
+            return Response({
+                'status': 'error',
+                'message': 'Payment not found'
             }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Payment verification error: {str(e)}")

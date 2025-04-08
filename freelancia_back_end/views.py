@@ -280,13 +280,13 @@ class UserDetailView(APIView):
 
 
 class ProposalViewAndCreate(PaginatedAPIView):
-    permission_classes = [AllowAny]
     serializer_class = ProposalSerializer
-
+    
     def get_permissions(self):
         if self.request.method == 'GET':
-            return [IsOwnerOrAdminOrReadOnly(owner_field_name='user')]
-        return [IsAuthenticated(), IsAdminUser()]
+            return [AllowAny()]
+        else:
+            return [IsAuthenticated()]
 
     def get(self, request):
         proposals = Proposal.objects.all()
@@ -311,23 +311,21 @@ class ProposalViewAndCreate(PaginatedAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        if request.data['project']:
-            project = get_object_or_404(Project, id=request.data['project'])
-        if serializer.is_valid():
-            try:
-                serializer.save(user=request.user, project=project)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            except IntegrityError:
-                return Response(
-                    {"error": "You have already submitted a proposal for this project."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def post(self, request):
-        serializer = ProposalSerializer(data=request.data)
-        if request.data['project']:
-            project = get_object_or_404(Project, id=request.data['project'])
+        
+        if 'project' not in request.data:
+            return Response(
+                {"error": "Project ID is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        project = get_object_or_404(Project, id=request.data['project'])
+        
+        if request.user.role != 'freelancer':
+            return Response(
+                {"error": "Only freelancers can submit proposals"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+            
         if serializer.is_valid():
             try:
                 serializer.save(user=request.user, project=project)

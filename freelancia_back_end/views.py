@@ -224,6 +224,21 @@ User = get_user_model()
 
 class CustomAuthToken(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
+        userinput= request.data['username']
+        if '@' in userinput:
+            user = User.objects.filter(email=userinput).first()
+            if user:
+                request.data['username'] = user.username
+        else:
+            user = User.objects.filter(username=userinput).first()
+            if user:
+                request.data['username'] = user.username
+        if user:
+
+            if user.is_active == False:
+                return Response({"detail": "User is Banned"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        
 
         response = super().post(request, *args, **kwargs)
 
@@ -242,7 +257,7 @@ class CustomAuthToken(TokenObtainPairView):
                 'rate': user.rate,
                 'image': image,
                 'user_balance': user.user_balance,
-            })
+            })    
 
         return response
 

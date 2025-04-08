@@ -28,6 +28,7 @@ Django==5.1.7
 django-channels-jwt==0.0.3
 django-cors-headers==4.7.0
 django-filter==25.1
+django-simpleui==2025.1.13
 djangorestframework==3.15.2
 djangorestframework_simplejwt==5.5.0
 docopt==0.6.2
@@ -65,6 +66,8 @@ langchain-core==0.3.51
 langchain-openai==0.3.12
 langchain-text-splitters==0.3.8
 langsmith==0.3.24
+manage.py==0.2.10
+Markdown==3.7
 MarkupSafe==3.0.2
 marshmallow==3.26.1
 matplotlib-inline==0.1.7

@@ -143,39 +143,60 @@ def userDetailView(request, pk):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
+        data = request.data.copy()
+
+        if 'password' in data:
+            password = data.pop('password')
+            user.set_password(password)
+            user.save()
+
         serializer = UserSerializer(
-            user, data=request.data, context={'request': request})
+            user, data=data, context={'request': request}
+        )
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     elif request.method == 'PATCH':
-        if 'image' in request.FILES:
+        data = request.data.copy()
+        files = request.FILES
+
+        if 'image' in files:
             if user.image:
                 user.image.delete()
-            user.image = request.FILES['image']
+            user.image = files['image']
             user.save()
-            image = user.image.url if user.image else None
-            if image:
-                image = request.build_absolute_uri(image)
-            return Response({"image": image}, status=status.HTTP_200_OK)
-        # print(request.data["delete_image"])
-        if "image" in request.data:
-            if request.data["image"] == None:
+            data.pop('image', None)
+
+        if 'image' in data and data['image'] is None:
+            if user.image:
                 user.image.delete()
                 user.image = None
                 user.save()
+            data.pop('image')
+
+        if 'password' in data:
+            password = data.pop('password')
+            user.set_password(password)
+            user.save()
+
         serializer = UserSerializer(
-            user, data=request.data, partial=True, context={'request': request})
+            user, data=data, partial=True, context={'request': request}
+        )
         if serializer.is_valid():
             serializer.save()
+            image_url = user.image.url if user.image else None
+            if image_url:
+                image_url = request.build_absolute_uri(image_url)
+            response_data = serializer.data
+            response_data['image'] = image_url
+            return Response(response_data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            print(serializer.data["image"])
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'DELETE':
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     elif request.method == 'DELETE':
         user.delete()
@@ -420,7 +441,8 @@ class ProjectAPI(APIView):
         self.permission_classes = [IsAuthenticated]
         self.check_permissions(request)
 
-        serializer = ProjectSerializer(data=request.data, context={'request': request})
+        serializer = ProjectSerializer(
+            data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save(owner_id=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -446,12 +468,13 @@ class ProjectAPI(APIView):
         if requested_state:
             if project.project_state == Project.StatusChoices.open and \
                requested_state in [Project.StatusChoices.contract_canceled_and_reopened, Project.StatusChoices.finished]:
-                 return Response(
+                return Response(
                     {"error": f"Cannot change state directly from '{Project.StatusChoices.open}' to '{requested_state}'."},
                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                )
 
-        serializer = ProjectSerializer(project, data=request.data, context={'request': request})
+        serializer = ProjectSerializer(
+            project, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -477,10 +500,10 @@ class ProjectAPI(APIView):
         if requested_state:
             if project.project_state == Project.StatusChoices.open and \
                requested_state in [Project.StatusChoices.contract_canceled_and_reopened, Project.StatusChoices.finished]:
-                 return Response(
+                return Response(
                     {"error": f"Cannot change state directly from '{Project.StatusChoices.open}' to '{requested_state}'."},
                     status=status.HTTP_400_BAD_REQUEST
-                 )
+                )
 
         serializer = ProjectSerializer(
             project, data=request.data, partial=True, context={'request': request}
@@ -510,6 +533,8 @@ class ProjectAPI(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 # Skill API views
+
+
 class SkillAPI(APIView):
 
     def get(self, request, id):

@@ -716,6 +716,38 @@ class CertificateViewSet(viewsets.ModelViewSet):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class UserSearch(ListAPIView):
+   pagination_class = BasePagination
+   permission_classes = [AllowAny]
+   serializer_class = UserSerializer
+   queryset = User.objects.all()
+   filter_backends = [SearchFilter, DjangoFilterBackend]
+   search_fields = ['username', 'first_name', 'last_name']
+
+
+   def get_queryset(self):
+       queryset = super().get_queryset()
+       search = self.request.GET.get('search', '').strip()
+       role = self.request.GET.get('role', '').strip()
+
+
+       if role and role.lower() != 'all':
+           if role.lower() == 'client':
+               queryset = queryset.filter(role=User.RoleChoices.client)
+           elif role.lower() == 'freelancer':
+               queryset = queryset.filter(role=User.RoleChoices.freelancer)
+
+
+       if search:
+           queryset = queryset.filter(
+               Q(username__icontains=search) |
+               Q(first_name__icontains=search) |
+               Q(last_name__icontains=search)
+           )
+
+
+       return queryset.distinct()
+
 # ------------------------------------------------------------------------
 # Display all Urls in list of Json
 

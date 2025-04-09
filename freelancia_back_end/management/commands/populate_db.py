@@ -23,16 +23,26 @@ def run():
     """Populate the database with realistic test data"""
     print("Starting database population...")
     
-    # Create skills (these should be created first as they're used by other models)
+    # Create static skills (these should be created first as they're used by other models)
+    static_skills = ['ReactJS', 'Python', 'JS', 'HTML/CSS']
+    for skill_name in static_skills:
+        try:
+            SkillFactory(skill=skill_name)  # Use SkillFactory to create the static skills
+        except IntegrityError:
+            # Skip duplicates
+            pass
+    print("✓ Static skills created")
+    
+    # Create random skills
     skills_count = 30
-    print(f"Creating {skills_count} skills...")
+    print(f"Creating {skills_count} random skills...")
     for _ in range(skills_count):
         try:
             SkillFactory()
         except IntegrityError:
             # Skip duplicates
             pass
-    print("✓ Skills created")
+    print("✓ Random skills created")
     
     # Create specialities
     specialities_count = 15
@@ -47,7 +57,7 @@ def run():
     
     # Create users with different roles
     print("Creating users...")
-    admin_count = 3
+    admin_count = 1
     client_count = 20
     freelancer_count = 50
     

@@ -38,11 +38,12 @@ urlpatterns = [
     path('api/payments/', include('payments.urls')),
 
     path("reports/", include('report.urls')),
+    path('contactus/', include('contactus.urls')),
 
     # path('chatauth/' , include('chat.urls')),
     # path("api/auth/chat/", include('django_channels_jwt.urls')),
     path("auth_for_ws_connection/", AsgiValidateTokenView.as_view()),
-    path("chat/" , include('chat.urls')),
+    path("chat/", include('chat.urls')),
     path('chatbot/', include('chatbot.urls')),
 ]
 if settings.DEBUG:

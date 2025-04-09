@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'chat',
     'chatbot',
     'report',
+    'contactus',
 ]
 
 MIDDLEWARE = [
@@ -108,11 +109,12 @@ ASGI_APPLICATION = 'freelancia.asgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "freelancia", # create the database in pgAdmin with the same name
-        "USER": "postgres", #you can keep the same user or create a new one
-        "PASSWORD": "123", # set your master postgres password or the password of the user you created
-        "HOST": "127.0.0.1",# Don't change it 
-        "PORT": "5432", # Don't change it 
+        "NAME": "freelancia",  # create the database in pgAdmin with the same name
+        "USER": "freelancia",  # you can keep the same user or create a new one
+        # set your master postgres password or the password of the user you created
+        "PASSWORD": "123",
+        "HOST": "127.0.0.1",  # Don't change it
+        "PORT": "5432",  # Don't change it
     }
 }
 

@@ -13,6 +13,7 @@ import paypalrestsdk
 from decimal import Decimal
 from rest_framework.views import APIView
 import logging
+from django.http import HttpResponseRedirect
 logger = logging.getLogger(__name__)
 
 paypalrestsdk.configure({
@@ -53,8 +54,8 @@ class PayPalBalanceChargeView(APIView):
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": f"{settings.FRONTEND_URL}/paypal/success",
-                "cancel_url": f"{settings.FRONTEND_URL}/paypal/cancel"
+                "return_url": f"{request.build_absolute_uri(reverse('success'))}?user_id={request.user.id}",
+                "cancel_url": request.build_absolute_uri(reverse('cancel'))
             },
             "transactions": [{
                 "amount": {
@@ -85,8 +86,11 @@ class PayPalSuccessView(APIView):
 
     def get(self, request):
         payment_id = request.GET.get('paymentId')
+        logger.info(f"PayPal payment success callback received for payment {payment_id}")
         payer_id = request.GET.get('PayerID')
+        logger.info(f"Payer ID: {payer_id}")
         user_id = request.GET.get('user_id')
+        logger.info(f"User ID: {user_id}")
         
         if not all([payment_id, payer_id, user_id]):
             return Response({
@@ -118,11 +122,10 @@ class PayPalSuccessView(APIView):
                     print(f"User after update: {user.user_balance}")
                     
                     logger.info(f"Balance updated successfully for user {user.username}")
-                    return Response({
-                        'status': 'success',
-                        'message': 'Payment successful and balance updated',
-                        'new_balance': user.user_balance
-                    })
+                    
+                # Redirect to frontend success page
+                frontend_success_url = f"{settings.FRONTEND_URL}/paypal/success?paymentId={payment_id}&user_id={user_id}"
+                return HttpResponseRedirect(frontend_success_url)
             else:
                 error_msg = payment.error.get('message', 'Payment execution failed')
                 logger.error(f"PayPal execution failed: {error_msg}")

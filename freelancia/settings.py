@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from datetime import timedelta
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -108,11 +112,11 @@ ASGI_APPLICATION = 'freelancia.asgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "freelancia", # create the database in pgAdmin with the same name
-        "USER": "postgres", #you can keep the same user or create a new one
-        "PASSWORD": "1991991Lilb", # set your master postgres password or the password of the user you created
-        "HOST": "127.0.0.1",# Don't change it 
-        "PORT": "5432", # Don't change it 
+        "NAME": "freelancia",  # create the database in pgAdmin with the same name
+        "USER": os.getenv("DB_USER"),  #! add "DB_USER in your .env file!!" Fetch from .env 
+        "PASSWORD": os.getenv("DB_PASSWORD"),  #!add "DB_PASSWORD in your .env file!!" Fetch from .env
+        "HOST": "127.0.0.1",  # Don't change it
+        "PORT": "5432",  # Don't change it
     }
 }
 

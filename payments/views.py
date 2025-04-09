@@ -112,8 +112,10 @@ class PayPalSuccessView(APIView):
                     user = User.objects.select_for_update().get(id=user_id)
                     
                     # Update user balance
+                    print(f"User before update: {user.user_balance}")
                     user.user_balance += amount
                     user.save()
+                    print(f"User after update: {user.user_balance}")
                     
                     logger.info(f"Balance updated successfully for user {user.username}")
                     return Response({

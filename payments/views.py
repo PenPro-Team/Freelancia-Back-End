@@ -53,8 +53,8 @@ class PayPalBalanceChargeView(APIView):
                 "payment_method": "paypal"
             },
             "redirect_urls": {
-                "return_url": f"{request.build_absolute_uri(reverse('success'))}?user_id={request.user.id}",
-                "cancel_url": request.build_absolute_uri(reverse('cancel'))
+                "return_url": f"{settings.FRONTEND_URL}/paypal/success",
+                "cancel_url": f"{settings.FRONTEND_URL}/paypal/cancel"
             },
             "transactions": [{
                 "amount": {

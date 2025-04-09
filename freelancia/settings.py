@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'chat',
     'chatbot',
     'report',
+    'contactus',
 ]
 
 MIDDLEWARE = [

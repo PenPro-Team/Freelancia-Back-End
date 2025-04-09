@@ -28,9 +28,8 @@ SECRET_KEY = 'django-insecure-t#)8(0vj!36x(w*gi^+%7kmi9!d^srw_p%78400uq6cba-*^x@
 DEBUG = True
 
 ALLOWED_HOSTS = []
+FRONTEND_URL = "http://localhost:3000"  # Update this to your frontend's domain
 
-
-# Application definition
 
 INSTALLED_APPS = [
     'simpleui',
@@ -109,12 +108,11 @@ ASGI_APPLICATION = 'freelancia.asgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "freelancia",  # create the database in pgAdmin with the same name
-        "USER": "freelancia",  # you can keep the same user or create a new one
-        # set your master postgres password or the password of the user you created
-        "PASSWORD": "123",
-        "HOST": "127.0.0.1",  # Don't change it
-        "PORT": "5432",  # Don't change it
+        "NAME": "freelancia", # create the database in pgAdmin with the same name
+        "USER": "postgres", #you can keep the same user or create a new one
+        "PASSWORD": "1991991Lilb", # set your master postgres password or the password of the user you created
+        "HOST": "127.0.0.1",# Don't change it 
+        "PORT": "5432", # Don't change it 
     }
 }
 

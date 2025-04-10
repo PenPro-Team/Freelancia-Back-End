@@ -102,23 +102,23 @@ ASGI_APPLICATION = 'freelancia.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "freelancia",  # create the database in pgAdmin with the same name
-#         "USER": os.getenv("DB_USER"),  #! add "DB_USER in your .env file!!" Fetch from .env
-#         "PASSWORD": os.getenv("DB_PASSWORD"),  #!add "DB_PASSWORD in your .env file!!" Fetch from .env
-#         "HOST": "127.0.0.1",  # Don't change it
-#         "PORT": "5432",  # Don't change it
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "freelancia",  # create the database in pgAdmin with the same name
+        "USER": os.getenv("DB_USER"),  #! add "DB_USER in your .env file!!" Fetch from .env
+        "PASSWORD": os.getenv("DB_PASSWORD"),  #!add "DB_PASSWORD in your .env file!!" Fetch from .env
+        "HOST": "127.0.0.1",  # Don't change it
+        "PORT": "5432",  # Don't change it
+    }
+}
 
 PAYPAL_CLIENT_ID = 'AWXLHM_HOQ6-DiakQ9MAvw7yCi_AOzfTuFjFmbHPVAOMVoZf7s9h8ExKTeqhIKzU0elb4KY7lzuvhpW5'
 PAYPAL_SECRET = 'EAFWBvxhk6XRyGy5nQN-S72dhbMVhq4DjkWXc_Qfa3i0Uuk9jJvAKSwNp3g18zPvFMkVbBKV8fAW4bHJ'

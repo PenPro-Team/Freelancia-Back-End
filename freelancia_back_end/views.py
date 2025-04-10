@@ -224,7 +224,7 @@ User = get_user_model()
 
 class CustomAuthToken(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
-        userinput= request.data['username']
+        userinput = request.data['username']
         if '@' in userinput:
             user = User.objects.filter(email=userinput).first()
             if user:
@@ -237,8 +237,6 @@ class CustomAuthToken(TokenObtainPairView):
 
             if user.is_active == False:
                 return Response({"detail": "User is Banned"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        
 
         response = super().post(request, *args, **kwargs)
 
@@ -257,7 +255,7 @@ class CustomAuthToken(TokenObtainPairView):
                 'rate': user.rate,
                 'image': image,
                 'user_balance': user.user_balance,
-            })    
+            })
 
         return response
 
@@ -281,7 +279,7 @@ class UserDetailView(APIView):
 
 class ProposalViewAndCreate(PaginatedAPIView):
     serializer_class = ProposalSerializer
-    
+
     def get_permissions(self):
         if self.request.method == 'GET':
             return [AllowAny()]
@@ -311,21 +309,21 @@ class ProposalViewAndCreate(PaginatedAPIView):
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
-        
+
         if 'project' not in request.data:
             return Response(
                 {"error": "Project ID is required"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-            
+
         project = get_object_or_404(Project, id=request.data['project'])
-        
+
         if request.user.role != 'freelancer':
             return Response(
                 {"error": "Only freelancers can submit proposals"},
                 status=status.HTTP_403_FORBIDDEN
             )
-            
+
         if serializer.is_valid():
             try:
                 serializer.save(user=request.user, project=project)
@@ -384,7 +382,7 @@ def ProjectView(request):
     View to list all projects.
     """
     paginator = BasePagination()
-    projects = Project.objects.all()
+    projects = Project.objects.all().order_by('-created_at')
     result_page = paginator.paginate_queryset(projects, request)
     serializer = ProjectSerializer(
         result_page, many=True, context={'request': request})
@@ -693,7 +691,14 @@ class CertificateViewSet(viewsets.ModelViewSet):
         but filter by user for other operations
         """
         if self.action in ['list', 'retrieve']:
-            return Certificate.objects.all()
+
+            user_id = self.request.query_params.get('user', None)
+
+            if user_id:
+                return Certificate.objects.filter(user=user_id)
+            else:
+                return Certificate.objects.all()
+
         return Certificate.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
@@ -716,37 +721,34 @@ class CertificateViewSet(viewsets.ModelViewSet):
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 class UserSearch(ListAPIView):
-   pagination_class = BasePagination
-   permission_classes = [AllowAny]
-   serializer_class = UserSerializer
-   queryset = User.objects.all()
-   filter_backends = [SearchFilter, DjangoFilterBackend]
-   search_fields = ['username', 'first_name', 'last_name']
+    pagination_class = BasePagination
+    permission_classes = [AllowAny]
+    serializer_class = UserSerializer
+    queryset = User.objects.all()
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['username', 'first_name', 'last_name']
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search = self.request.GET.get('search', '').strip()
+        role = self.request.GET.get('role', '').strip()
 
-   def get_queryset(self):
-       queryset = super().get_queryset()
-       search = self.request.GET.get('search', '').strip()
-       role = self.request.GET.get('role', '').strip()
+        if role and role.lower() != 'all':
+            if role.lower() == 'client':
+                queryset = queryset.filter(role=User.RoleChoices.client)
+            elif role.lower() == 'freelancer':
+                queryset = queryset.filter(role=User.RoleChoices.freelancer)
 
+        if search:
+            queryset = queryset.filter(
+                Q(username__icontains=search) |
+                Q(first_name__icontains=search) |
+                Q(last_name__icontains=search)
+            )
 
-       if role and role.lower() != 'all':
-           if role.lower() == 'client':
-               queryset = queryset.filter(role=User.RoleChoices.client)
-           elif role.lower() == 'freelancer':
-               queryset = queryset.filter(role=User.RoleChoices.freelancer)
-
-
-       if search:
-           queryset = queryset.filter(
-               Q(username__icontains=search) |
-               Q(first_name__icontains=search) |
-               Q(last_name__icontains=search)
-           )
-
-
-       return queryset.distinct()
+        return queryset.distinct()
 
 # ------------------------------------------------------------------------
 # Display all Urls in list of Json
